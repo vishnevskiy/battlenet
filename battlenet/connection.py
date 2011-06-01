@@ -77,9 +77,14 @@ class Connection(object):
 
     def get_character(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
-        realm = slugify(realm)
+        realm_slug = slugify(realm)
 
-        data = self.make_request(region, '/character/%s/%s' % (realm, name), {'fields': fields})
+        if not realm_slug:
+            realm_slug = quote(realm)
+        else:
+            realm_slug = quote(realm_slug)
+
+        data = self.make_request(region, '/character/%s/%s' % (realm_slug, name), {'fields': fields})
 
         if raw:
             return data

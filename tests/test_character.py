@@ -83,6 +83,12 @@ class CharacterTest(unittest.TestCase):
         
         self.assertEqual(character.name, 'Clí')
 
+    def test_pet_class(self):
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Tandisse', fields=[Character.TALENTS])
+
+        self.assertTrue(hasattr(character, 'pets'))
+        self.assertIn('Rudebull', [pet.name for pet in character.pets])
+
 
 if __name__ == '__main__':
     unittest.main()
