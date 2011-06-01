@@ -1,7 +1,7 @@
 battlenet
 =====================
 
-A Pythonic library for Blizzard's Battle.net API for World of Warcraft.
+Python Library for Blizzard's Community Platform API
 
 Major features
 ----------------------
