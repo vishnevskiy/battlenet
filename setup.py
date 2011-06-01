@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-DESCRIPTION = 'Python Library for Blizzard\'s Community Platform API'
+DESCRIPTION = "Python Library for Blizzard's Community Platform API"
 
 with open('README.rst') as f:
     LONG_DESCRIPTION = f.read()
@@ -13,7 +13,6 @@ CLASSIFIERS = [
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
-    'Topic :: Database',
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
