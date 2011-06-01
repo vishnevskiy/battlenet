@@ -1,24 +1,20 @@
 import unittest
 import os
-from battlenet.connection import Connection
-from battlenet.things import Character
+import battlenet
+from battlenet import Character
 
-REGION = Connection.US
-REALM = 'Nazjatar'
-CHARACTER = 'Vishnevskiy'
-
-Connection.setup(app=os.environ.get('BATTLENET_APP'))
+battlenet.Connection.setup(app=os.environ.get('BATTLENET_APP'))
 
 class CharacterTest(unittest.TestCase):
     def test_general(self):
-        character = Character(REGION, REALM, CHARACTER)
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy')
 
-        self.assertEqual(character.name, CHARACTER)
-        self.assertEqual(str(character), CHARACTER)
+        self.assertEqual(character.name, 'Vishnevskiy')
+        self.assertEqual(str(character), 'Vishnevskiy')
 
-        self.assertEqual(character.get_realm_name(), REALM)
-        self.assertEqual(character.realm.name, REALM)
-        self.assertEqual(str(character.realm), REALM)
+        self.assertEqual(character.get_realm_name(), 'Nazjatar')
+        self.assertEqual(character.realm.name, 'Nazjatar')
+        self.assertEqual(str(character.realm), 'Nazjatar')
 
         self.assertEqual(character.faction, Character.HORDE)
 
@@ -34,17 +30,17 @@ class CharacterTest(unittest.TestCase):
         self.assertEqual(character.gender, Character.MALE)
 
     def test_guild(self):
-        character = Character(REGION, REALM, CHARACTER, fields=[Character.GUILD])
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.GUILD])
 
         self.assertEqual(character.guild.name, 'Excellence')
 
     def test_stats(self):
-        character = Character(REGION, REALM, CHARACTER, fields=[Character.STATS])
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.STATS])
 
         self.assertIsInstance(character.stats.agility, int)
 
     def test_professions(self):
-        character = Character(REGION, REALM, CHARACTER, fields=[Character.PROFESSIONS])
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.PROFESSIONS])
 
         primary = character.professions['primary']
 
@@ -66,11 +62,11 @@ class CharacterTest(unittest.TestCase):
         self.assertEqual(archaeology.name, Character.ARCHAEOLOGY)
 
     def test_appearance(self):
-        character = Character(REGION, REALM, CHARACTER, fields=[Character.APPEARANCE])
-
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.APPEARANCE])
+        
         self.assertEqual(character.appearance.face, 2)
-        self.assertEqual(character.appearance.feature, 9)
-        self.assertEqual(character.appearance.hair_color, 3)
+        self.assertEqual(character.appearance.feature, 3)
+        self.assertEqual(character.appearance.hair_color, 0)
         self.assertEqual(character.appearance.show_cloak, True)
         self.assertEqual(character.appearance.show_helm, True)
         self.assertEqual(character.appearance.hair, 5)

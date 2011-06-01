@@ -10,15 +10,14 @@ try:
     from eventlet.green import urllib2 as eventlet_urllib2
 except ImportError:
     eventlet_urllib2 = None
-    
+
+__all__ = ['Connection']
+
 URL_FORMAT = os.environ.get('BATTLENET_URL_FORMAT', 'http://%(region)s.battle.net/api/%(game)s%(path)s?%(params)s')
 
 logger = logging.getLogger('battlenet')
 
 class Connection(object):
-    US = 'us'
-    EU = 'eu'
-
     defaults = {
         'eventlet': False,
         'app': None

@@ -5,6 +5,8 @@ import simplejson
 from .enums import RACE, CLASS, QUALITY, RACE_TO_FACTION
 from .utils import make_icon_url, normalize, make_connection
 
+__all__ = ['Character', 'Guild', 'Realm']
+
 class Thing(object):
     def to_json(self):
         return simplejson.dumps(getattr(self, '_data'))
@@ -34,7 +36,7 @@ class Character(Thing):
     HUMAN = 'Human'
     NIGHT_ELF = 'Nihgt Elf'
     WORGEN = 'Worgen'
-    
+
     BLOOD_ELF = 'Blood Elf'
     UNDEAD = 'Undead'
     GOBLIN = 'Goblin'
@@ -217,7 +219,7 @@ class Character(Thing):
         for field in fields:
             self._fields.add(field)
             
-        self.populate(self.connection.get_character(self.realm, self.name, raw=True, fields=self._fields))
+        self.populate(self.connection.get_character(self.region, self.realm, self.name, raw=True, fields=self._fields))
 
         for field in self._fields:
             try:
