@@ -1,13 +1,10 @@
 import unittest
-import os
 import battlenet
 from battlenet import Realm
 
-battlenet.Connection.setup(app=os.environ.get('BATTLENET_APP'))
-
 class RealmTest(unittest.TestCase):
     def setUp(self):
-        self.connection = battlenet.Connection(os.environ.get('BATTLENET_APP'))
+        self.connection = battlenet.Connection()
 
     def test_realm_by_name(self):
         name = "Kil'jaeden"
@@ -38,7 +35,7 @@ class RealmTest(unittest.TestCase):
     def test_realm_population(self):
         realm = self.connection.get_realm(battlenet.UNITED_STATES, 'nazjatar')
 
-        self.assertEqual(realm.population, Realm.LOW)
+        self.assertIn(realm.population, [Realm.LOW, Realm.MEDIUM, Realm.HIGH])
 
     def tearDown(self):
         del self.connection

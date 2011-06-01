@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import unittest
 import os
 import battlenet
@@ -65,11 +67,22 @@ class CharacterTest(unittest.TestCase):
         character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.APPEARANCE])
         
         self.assertEqual(character.appearance.face, 2)
-        self.assertEqual(character.appearance.feature, 3)
-        self.assertEqual(character.appearance.hair_color, 0)
+        self.assertEqual(character.appearance.feature, 9)
+        self.assertEqual(character.appearance.hair_color, 3)
         self.assertEqual(character.appearance.show_cloak, True)
         self.assertEqual(character.appearance.show_helm, True)
         self.assertEqual(character.appearance.hair, 5)
+
+    def test_lazyload(self):
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy')
+
+        self.assertEqual(character.guild.realm.name, 'Nazjatar')
+
+    def test_unicode(self):
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Clí')
+        
+        self.assertEqual(character.name, 'Clí')
+
 
 if __name__ == '__main__':
     unittest.main()

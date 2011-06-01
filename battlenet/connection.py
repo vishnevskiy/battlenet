@@ -24,9 +24,9 @@ class Connection(object):
     }
 
     def __init__(self, app=None, game='wow', eventlet=None):
-        self.app = app or Connection.get_default('app')
+        self.app = app or  Connection.defaults.get('app', None)
         self.game = game
-        self.eventlet = eventlet or Connection.get_default('eventlet')
+        self.eventlet = eventlet or Connection.defaults.get('eventlet', False)
 
     def __eq__(self, other):
         if not isinstance(other, Connection):
@@ -41,15 +41,11 @@ class Connection(object):
     def setup(**defaults):
         Connection.defaults.update(defaults)
 
-    @staticmethod
-    def get_default(name):
-        value = Connection.defaults.get(name)
-        assert value is not None
-        return value
-
     def make_request(self, region, path, params=None):
         params = params or {}
-        params['app'] = self.app
+
+        if self.app:
+            params['app'] = self.app
 
         url = URL_FORMAT % {
             'region': region,
