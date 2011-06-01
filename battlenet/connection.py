@@ -95,7 +95,14 @@ class Connection(object):
         return [Realm(region, data=realm, connection=self) for realm in data['realms']]
 
     def get_realm(self, region, name, raw=False):
-        data = self.make_request(region, '/realm/status', {'realm': slugify(name)})
+        slug = slugify(name)
+
+        if not slug:
+            slug = quote(name)
+        else:
+            slug = quote(slug)
+
+        data = self.make_request(region, '/realm/status', {'realm': slug})
 
         if len(data['realms']) != 1:
             raise RealmNotFound

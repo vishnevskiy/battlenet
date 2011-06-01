@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import unittest
 import battlenet
 from battlenet import Realm
@@ -36,6 +38,11 @@ class RealmTest(unittest.TestCase):
         realm = self.connection.get_realm(battlenet.UNITED_STATES, 'nazjatar')
 
         self.assertIn(realm.population, [Realm.LOW, Realm.MEDIUM, Realm.HIGH])
+
+    def test_unicode(self):
+        realm = self.connection.get_realm(battlenet.EUROPE, 'Термоштепсель')
+
+        self.assertEqual(realm.name, 'Термоштепсель')
 
     def tearDown(self):
         del self.connection
