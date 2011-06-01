@@ -54,7 +54,7 @@ Fetching a specific realm
     # => PVP
 
 
-Fetching a all realms
+Fetching all realms
 -------------------------
 
 ::
