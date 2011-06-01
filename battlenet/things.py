@@ -129,6 +129,9 @@ class Character(Thing):
         self.achievement_points = data['achievementPoints']
         self.faction = RACE_TO_FACTION[self.race]
 
+        if 'pets' in data:
+            self.pets = [Pet(pet) for pet in self._data['pets']]
+
     @property
     def realm(self):
         if not hasattr(self, '_realm'):
@@ -219,7 +222,8 @@ class Character(Thing):
         for field in fields:
             self._fields.add(field)
             
-        self.populate(self.connection.get_character(self.region, self.realm, self.name, raw=True, fields=self._fields))
+        self.populate(self.connection.get_character(self.region, self._data['realm'],
+            self.name, raw=True, fields=self._fields))
 
         for field in self._fields:
             try:
@@ -577,5 +581,19 @@ class Profession(Thing):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__, self.name)
+
+class Pet(Thing):
+    def __init__(self, data):
+        self._data = data
+
+        self.name = data['name']
+        self.creature = data['creature']
+        self.slot = data['slot']
+
+    def __str__(self):
+        return self.name
+    
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.name)
