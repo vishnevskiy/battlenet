@@ -1,9 +1,7 @@
 battlenet
 =====================
 
-battlenet for Python is a library to interact with Blizzard's Battle.net API for
-World of Warcraft.
-
+A Pythonic library for Blizzard's Battle.net API for World of Warcraft.
 
 Major features
 ----------------------
@@ -20,6 +18,7 @@ Making a connection
 Global connection settings can be setup so that objects can make connections on the fly.
 
 ::
+
     from battlenet import Connection
 
     Connection.setup(app='app key')
@@ -36,6 +35,7 @@ Fetching a specific realm
 -------------------------
 
 ::
+
     from battlenet import Realm
 
     # If a global connection was setup
@@ -58,6 +58,7 @@ Fetching a all realms
 -------------------------
 
 ::
+
     for realm in connection.get_all_realms():
         print realm
 
@@ -65,6 +66,7 @@ Fetching a character
 ----------------------
 
 ::
+
     from battlenet import Character
 
     # If a global connection was setup
