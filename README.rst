@@ -8,6 +8,8 @@ Major features
 
 * Pythonic
 
+* Unicode normalization
+
 * Lazyloading and eagerloading
 
 * Eventlet support
@@ -15,7 +17,7 @@ Major features
 Making a connection
 ----------------------
 
-Global connection settings can be setup so that objects can make connections on the fly.
+Global connection settings can be setup so that objects can make connections implicitly.
 
 ::
 
@@ -23,7 +25,7 @@ Global connection settings can be setup so that objects can make connections on 
 
     Connection.setup(app='app key')
 
-You can also create connections on the fly.
+You can also create connections explicitly.
 
 ::
 

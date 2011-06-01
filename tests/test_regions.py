@@ -1,9 +1,6 @@
 import unittest
 import os
 import battlenet
-from battlenet import Realm
-
-battlenet.Connection.setup(app=os.environ.get('BATTLENET_APP'))
 
 class RegionsTest(unittest.TestCase):
     def setUp(self):
