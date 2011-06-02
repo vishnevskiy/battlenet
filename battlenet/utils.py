@@ -6,9 +6,13 @@ _slugify_strip_re = re.compile(r'[^\w\s-]')
 _slugify_hyphenate_re = re.compile(r'[-\s]+')
 
 def slugify(value):
-    value = unicode(_slugify_strip_re.sub('', normalize(value)).strip().lower())
+    slug = unicode(_slugify_strip_re.sub('', normalize(value)).strip().lower())
+    slug = _slugify_hyphenate_re.sub('-', slug)
 
-    return _slugify_hyphenate_re.sub('-', value)
+    if not slug:
+        return quote(value)
+
+    return quote(slug)
 
 def normalize(name):
     if not isinstance(name, unicode):

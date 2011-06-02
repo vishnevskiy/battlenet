@@ -29,6 +29,13 @@ class RealmTest(unittest.TestCase):
 
         self.assertGreater(len(realms), 0)
 
+    def test_realms(self):
+        names = ['Blackrock', 'Nazjatar']
+
+        realms = self.connection.get_realms(battlenet.UNITED_STATES, names)
+
+        self.assertEqual(names, [realm.name for realm in realms])
+
     def test_realm_type(self):
         realm = self.connection.get_realm(battlenet.UNITED_STATES, 'nazjatar')
 
