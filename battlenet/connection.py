@@ -31,12 +31,12 @@ class Connection(object):
     def __eq__(self, other):
         if not isinstance(other, Connection):
             return False
-        
+
         return self.game == other.game
 
     def __ne__(self, other):
         return not self.__eq__(other)
-    
+
     @staticmethod
     def setup(**defaults):
         Connection.defaults.update(defaults)
@@ -77,14 +77,9 @@ class Connection(object):
 
     def get_character(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
-        realm_slug = slugify(realm)
+        realm = slugify(realm)
 
-        if not realm_slug:
-            realm_slug = quote(realm)
-        else:
-            realm_slug = quote(realm_slug)
-
-        data = self.make_request(region, '/character/%s/%s' % (realm_slug, name), {'fields': fields})
+        data = self.make_request(region, '/character/%s/%s' % (realm, name), {'fields': fields})
 
         if raw:
             return data
@@ -99,15 +94,16 @@ class Connection(object):
 
         return [Realm(region, data=realm, connection=self) for realm in data['realms']]
 
+    def get_realms(self, region, names, raw=False):
+        data = self.make_request(region, '/realm/status', {'realms': ','.join(map(slugify, names))})
+
+        if raw:
+            return data['realms']
+
+        return [Realm(region, data=realm, connection=self) for realm in data['realms']]
+
     def get_realm(self, region, name, raw=False):
-        slug = slugify(name)
-
-        if not slug:
-            slug = quote(name)
-        else:
-            slug = quote(slug)
-
-        data = self.make_request(region, '/realm/status', {'realm': slug})
+        data = self.make_request(region, '/realm/status', {'realm': slugify(name)})
 
         if len(data['realms']) != 1:
             raise RealmNotFound
