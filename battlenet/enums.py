@@ -23,7 +23,7 @@ CLASS = {
     8: 'Mage',
     9: 'Warlock',
     11: 'Druid',
-    12: 'Death Knight',
+    6: 'Death Knight',
 }
 
 QUALITY = {

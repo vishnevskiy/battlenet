@@ -214,7 +214,7 @@ class Character(Thing):
     @property
     def stats(self):
         if self._refresh_if_not_present(Character.STATS):
-            self._stats = Stats(self._data[Character.STATS])
+            self._stats = Stats(self, self._data[Character.STATS])
 
         return self._stats
 
@@ -411,7 +411,8 @@ class Item(Thing):
         return make_icon_url(self._character.region, self.icon, size)
 
 class Stats(Thing):
-    def __init__(self, data):
+    def __init__(self, character, data):
+        self._character = character
         self._data = data
 
         self.agility = data['agi']
@@ -462,6 +463,45 @@ class Stats(Thing):
         self.spirit = data['spr']
         self.stamina = data['sta']
         self.strength = data['str']
+
+    @property
+    def hit(self):
+        return self._convert_rating_to_percent({
+            60: 9.37931,
+            70: 14.7905,
+            80: 40.7548,
+            85: 120.109
+        }, self.hit_rating)
+
+    @property
+    def spell_hit(self):
+        return self._convert_rating_to_percent({
+            60: 8,
+            70: 12.6154,
+            80: 26.232,
+            85: 102.446
+        }, self.hit_rating)
+
+    @property
+    def haste(self):
+        return self._convert_rating_to_percent({
+            60: 10,
+            70: 15.77,
+            80: 32.79,
+            85: 128.05701
+        }, self.haste_rating)
+
+    def _convert_rating_to_percent(self, ratios, rating):
+        percent = None
+
+        for threshold in sorted(ratios.keys()):
+            if self._character.level <= threshold:
+                percent = rating / ratios[threshold]
+
+        if percent is None:
+            percent = rating / rating[max(ratios.keys())]
+
+        return percent
 
 class Appearance(Thing):
     def __init__(self, data):
