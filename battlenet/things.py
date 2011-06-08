@@ -82,7 +82,8 @@ class Character(Thing):
     COMPANIONS = 'companions'
     MOUNTS = 'mounts'
     GUILD = 'guild'
-    ALL_FIELDS = [STATS, TALENTS, ITEMS, REPUTATIONS, TITLES, PROFESSIONS, APPEARANCE, COMPANIONS, MOUNTS, GUILD]
+    QUESTS = 'quests'
+    ALL_FIELDS = [STATS, TALENTS, ITEMS, REPUTATIONS, TITLES, PROFESSIONS, APPEARANCE, COMPANIONS, MOUNTS, GUILD, QUESTS]
 
     def __init__(self, region, realm=None, name=None, data=None, fields=None, connection=None):
         self.region = region
