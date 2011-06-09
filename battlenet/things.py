@@ -225,8 +225,10 @@ class Character(LazyThing):
     @property
     def guild(self):
         if self._refresh_if_not_present(Character.GUILD):
-            self._guild = Guild(self.region, realm=self._data['realm'],
-                data=self._data[Character.GUILD], connection=self.connection)
+            data = self._data[Character.GUILD]
+            data['side'] = self.faction.lower()
+
+            self._guild = Guild(self.region, realm=self._data['realm'], data=data, connection=self.connection)
 
         return self._guild
 
@@ -340,6 +342,9 @@ class Guild(LazyThing):
         self._populate_data(data)
 
     def __len__(self):
+        if 'members' in self._data and isinstance(self._data['members'], int):
+            return self._data['members']
+        
         return len(self.members)
 
     def __str__(self):
@@ -356,9 +361,9 @@ class Guild(LazyThing):
 
         self.name = normalize(data['name'])
         self.level = data['level']
-        self.level = data['level']
         self.emblem = Emblem(data['emblem']) if 'emblem' in data else None
         self.achievement_points = data['achievementPoints']
+        self.side = data['side'].capitalize()
 
     def refresh(self, *fields):
         for field in fields:

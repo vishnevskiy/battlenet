@@ -14,6 +14,8 @@ class CharacterTest(unittest.TestCase):
     def test_general(self):
         character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy')
 
+        print character.guild.refresh()
+
         self.assertEqual(character.name, 'Vishnevskiy')
         self.assertEqual(str(character), 'Vishnevskiy')
 
