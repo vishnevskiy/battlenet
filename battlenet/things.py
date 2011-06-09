@@ -363,7 +363,7 @@ class Guild(LazyThing):
         self.level = data['level']
         self.emblem = Emblem(data['emblem']) if 'emblem' in data else None
         self.achievement_points = data['achievementPoints']
-        self.side = data['side'].capitalize()
+        self.faction = data['side'].capitalize()
 
     def refresh(self, *fields):
         for field in fields:
