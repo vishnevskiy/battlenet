@@ -2,6 +2,11 @@ import simplejson
 import logging
 import urllib2
 import os
+import base64
+import hmac
+import sha
+import time
+import urlparse
 from .things import Character, Realm
 from .exceptions import APIError, RealmNotFound
 from .utils import slugify, quote
@@ -13,18 +18,23 @@ except ImportError:
 
 __all__ = ['Connection']
 
-URL_FORMAT = os.environ.get('BATTLENET_URL_FORMAT', 'http://%(region)s.battle.net/api/%(game)s%(path)s?%(params)s')
+URL_FORMAT = 'http://%(region)s.battle.net/api/%(game)s%(path)s?%(params)s'
 
 logger = logging.getLogger('battlenet')
+
+WDAY = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
+MON = ('', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
 
 class Connection(object):
     defaults = {
         'eventlet': False,
-        'app': None
+        'public_key': None,
+        'private_key': None
     }
 
-    def __init__(self, app=None, game='wow', eventlet=None):
-        self.app = app or  Connection.defaults.get('app', None)
+    def __init__(self, public_key = None, private_key = None, game='wow', eventlet=None):
+        self.public_key = public_key or  Connection.defaults.get('public_key')
+        self.private_key = private_key or  Connection.defaults.get('private_key')
         self.game = game
         self.eventlet = eventlet or Connection.defaults.get('eventlet', False)
 
@@ -41,11 +51,16 @@ class Connection(object):
     def setup(**defaults):
         Connection.defaults.update(defaults)
 
+    def sign(self, method, now, url, private_key):
+        string_to_sign = '%s\n%s\n%s\n' % (method, now, url)
+        return base64.encodestring(hmac.new(private_key, string_to_sign, sha).digest()).rstrip()
+
     def make_request(self, region, path, params=None):
         params = params or {}
 
-        if self.app:
-            params['app'] = self.app
+        now = time.gmtime()
+        date = '%s, %2d %s %d %2d:%02d:%02d GMT' % (WDAY[now[6]], now[2], MON[now[1]], now[0], now[3], now[4], now[5])
+        headers = { 'Date': date }
 
         url = URL_FORMAT % {
             'region': region,
@@ -55,13 +70,20 @@ class Connection(object):
                 for k, v in params.items() if v)
         }
 
+        uri = urlparse.urlparse(url)
+
+        if self.public_key:
+            signature = self.sign('GET', date, uri.path, self.private_key)
+            headers['Authorization'] = 'BNET %s:%s' % (self.public_key, signature)
+
         logger.debug('Battle.net => ' + url)
 
         try:
+            request = urllib2.Request(url, None, headers)
             if self.eventlet and eventlet_urllib2:
-                response = eventlet_urllib2.urlopen(url)
+                response = eventlet_urllib2.urlopen(request)
             else:
-                response = urllib2.urlopen(url)
+                response = urllib2.urlopen(request)
         except urllib2.URLError:
             raise APIError('HTTP 404')
 

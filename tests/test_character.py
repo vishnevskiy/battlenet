@@ -5,7 +5,10 @@ import os
 import battlenet
 from battlenet import Character
 
-battlenet.Connection.setup(app=os.environ.get('BATTLENET_APP'))
+PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY')
+PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')
+
+battlenet.Connection.setup(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY)
 
 class CharacterTest(unittest.TestCase):
     def test_general(self):
@@ -57,8 +60,8 @@ class CharacterTest(unittest.TestCase):
 
         secondary = character.professions['secondary']
 
-        first_aid = secondary[0]
-        archaeology = secondary[1]
+        first_aid = secondary[1]
+        archaeology = secondary[0]
 
         self.assertEqual(first_aid.name, Character.FIRST_AID)
         self.assertEqual(archaeology.name, Character.ARCHAEOLOGY)
@@ -84,7 +87,7 @@ class CharacterTest(unittest.TestCase):
         self.assertEqual(character.name, 'Clí')
 
     def test_pet_class(self):
-        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Tandisse', fields=[Character.TALENTS])
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Tandisse', fields=[Character.PETS])
 
         self.assertTrue(hasattr(character, 'pets'))
         self.assertIn('Rudebull', [pet.name for pet in character.pets])
