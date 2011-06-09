@@ -1,15 +1,32 @@
 import operator
 import collections
 import datetime
-import simplejson
 from .enums import RACE, CLASS, QUALITY, RACE_TO_FACTION
 from .utils import make_icon_url, normalize, make_connection
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 __all__ = ['Character', 'Guild', 'Realm']
 
 class Thing(object):
+    def __init__(self, data):
+        self._data = data
+
     def to_json(self):
-        return simplejson.dumps(getattr(self, '_data'))
+        return json.dumps(self._data)
+
+    def _refresh_if_not_present(self, field):
+        if not hasattr(self, '_' + field):
+            if field not in self._data:
+                self.refresh(field)
+
+            return True
+
+    def refresh(self, *fields):
+        raise NotImplementedError
 
     def __repr__(self):
         return '<%s>' % (self.__class__.__name__,)
@@ -102,7 +119,7 @@ class Character(Thing):
         return self.name
 
     def __repr__(self):
-        return '<%s: %s@%s>' % (self.__class__.__name__, self.name, self.realm)
+        return '<%s: %s@%s>' % (self.__class__.__name__, self.name, self._data['realm'])
 
     def __eq__(self, other):
         if not isinstance(other, Character):
@@ -112,13 +129,6 @@ class Character(Thing):
             and self.name == other.name \
             and self.get_realm_name() == other.get_realm_name()
 
-    def _refresh_if_not_present(self, field):
-        if not hasattr(self, '_' + field):
-            if field not in self._data:
-                self.refresh(field)
-
-            return True
-        
     def populate(self, data):
         self._data = data
 
@@ -128,7 +138,7 @@ class Character(Thing):
         self.race = data['race']
         self.thumbnail = data['thumbnail']
         self.gender = data['gender']
-        self.last_modified = datetime.datetime.fromtimestamp(data['lastModified'] / 1000)
+        self.last_modified = datetime.datetime.fromtimestamp(data['lastModified'] / 1000) if 'lastModified' in data else None
         self.achievement_points = data['achievementPoints']
         self.faction = RACE_TO_FACTION[self.race]
 
@@ -196,7 +206,8 @@ class Character(Thing):
     @property
     def guild(self):
         if self._refresh_if_not_present(Character.GUILD):
-            self._guild = Guild(self.region, data=self._data[Character.GUILD], connection=self.connection)
+            self._guild = Guild(self.region, realm=self._data['realm'],
+                data=self._data[Character.GUILD], connection=self.connection)
 
         return self._guild
 
@@ -297,31 +308,76 @@ class Reputation(Thing):
         return int(100.0 * self.value / self.max)
 
 class Guild(Thing):
-    def __init__(self, region, realm=None, name=None, data=None, connection=None):
+    ACHIEVEMENTS = 'achievements'
+    MEMBERS = 'members'
+    ALL_FIELDS = [ACHIEVEMENTS, MEMBERS]
+
+    def __init__(self, region, realm=None, name=None, data=None, fields=None, connection=None):
         self.region = region
         self.connection = connection or make_connection()
 
+        self._fields = set(fields or [])
+
         if realm and name:
-            pass # TODO: Add when Guild API exists!
+            data = self.connection.get_guild(region, realm, name, raw=True, fields=self._fields)
+            data['realm'] = realm # Copy over realm since API does not provide it!
+
+        self.populate(data)
+
+    def __len__(self):
+        return len(self.members)
+
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return '<%s: %s@%s>' % (self.__class__.__name__, self.name, self._data['realm'])
+
+    def populate(self, data):
+        if hasattr(self, '_data'):
+            data['realm'] = self._data['realm'] # Copy over realm since API does not provide it!
 
         self._data = data
 
         self.name = normalize(data['name'])
         self.level = data['level']
-        self.members = data['members']
         self.level = data['level']
-        self.emblem = Emblem(data['emblem'])
+        self.emblem = Emblem(data['emblem']) if 'emblem' in data else None
         self.achievement_points = data['achievementPoints']
 
-    def __len__(self):
-        return self.members
+    def refresh(self, *fields):
+        for field in fields:
+            self._fields.add(field)
 
-    def __repr__(self):
-        return '<%s: %s@%s>' % (self.__class__.__name__, self.name, self.realm)
+        self.populate(self.connection.get_guild(self.region, self._data['realm'],
+            self.name, raw=True, fields=self._fields))
+
+        for field in self._fields:
+            try:
+                delattr(self, '_' + field)
+            except AttributeError:
+                pass
 
     @property
-    def roster(self):
-        return []
+    def members(self):
+        if self._refresh_if_not_present(Guild.MEMBERS):
+            self._members = []
+
+            for member in self._data[Guild.MEMBERS]:
+                character = Character(self.region, data=member['character'], connection=self.connection)
+                character._guild = self
+
+                self._members.append({
+                    'character': character,
+                    'rank': member['rank']
+                })
+
+        return self._members
+
+    def get_leader(self):
+        for member in self.members:
+            if member['rank'] is 0:
+                return member['character']
 
     @property
     def realm(self):

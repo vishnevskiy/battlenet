@@ -1,15 +1,18 @@
-import simplejson
 import logging
 import urllib2
-import os
 import base64
 import hmac
 import sha
 import time
 import urlparse
-from .things import Character, Realm
+from .things import Character, Realm, Guild
 from .exceptions import APIError, RealmNotFound
 from .utils import slugify, quote
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 try:
     from eventlet.green import urllib2 as eventlet_urllib2
@@ -22,8 +25,8 @@ URL_FORMAT = 'http://%(region)s.battle.net/api/%(game)s%(path)s?%(params)s'
 
 logger = logging.getLogger('battlenet')
 
-WDAY = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
-MON = ('', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+DAYS = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun',)
+MONTHS = ('', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',)
 
 class Connection(object):
     defaults = {
@@ -32,7 +35,7 @@ class Connection(object):
         'private_key': None
     }
 
-    def __init__(self, public_key = None, private_key = None, game='wow', eventlet=None):
+    def __init__(self, public_key=None, private_key=None, game='wow', eventlet=None):
         self.public_key = public_key or  Connection.defaults.get('public_key')
         self.private_key = private_key or  Connection.defaults.get('private_key')
         self.game = game
@@ -51,7 +54,7 @@ class Connection(object):
     def setup(**defaults):
         Connection.defaults.update(defaults)
 
-    def sign(self, method, now, url, private_key):
+    def sign_request(self, method, now, url, private_key):
         string_to_sign = '%s\n%s\n%s\n' % (method, now, url)
         return base64.encodestring(hmac.new(private_key, string_to_sign, sha).digest()).rstrip()
 
@@ -59,8 +62,12 @@ class Connection(object):
         params = params or {}
 
         now = time.gmtime()
-        date = '%s, %2d %s %d %2d:%02d:%02d GMT' % (WDAY[now[6]], now[2], MON[now[1]], now[0], now[3], now[4], now[5])
-        headers = { 'Date': date }
+        date = '%s, %2d %s %d %2d:%02d:%02d GMT' % \
+               (DAYS[now[6]], now[2], MONTHS[now[1]], now[0], now[3], now[4], now[5])
+
+        headers = {
+            'Date': date
+        }
 
         url = URL_FORMAT % {
             'region': region,
@@ -73,11 +80,11 @@ class Connection(object):
         uri = urlparse.urlparse(url)
 
         if self.public_key:
-            signature = self.sign('GET', date, uri.path, self.private_key)
+            signature = self.sign_request('GET', date, uri.path, self.private_key)
             headers['Authorization'] = 'BNET %s:%s' % (self.public_key, signature)
 
         logger.debug('Battle.net => ' + url)
-
+        
         try:
             request = urllib2.Request(url, None, headers)
             if self.eventlet and eventlet_urllib2:
@@ -88,8 +95,8 @@ class Connection(object):
             raise APIError('HTTP 404')
 
         try:
-            data = simplejson.loads(response.read())
-        except simplejson.JSONDecodeError:
+            data = json.loads(response.read())
+        except json.JSONDecodeError:
             raise APIError('Non-JSON Response')
         else:
             if data.get('status') == 'nok':
@@ -107,6 +114,17 @@ class Connection(object):
             return data
 
         return Character(region, data=data, connection=self)
+
+    def get_guild(self, region, realm, name, fields=None, raw=False):
+        name = quote(name.lower())
+        realm = slugify(realm)
+
+        data = self.make_request(region, '/guild/%s/%s' % (realm, name), {'fields': fields})
+
+        if raw:
+            return data
+
+        return Guild(region, data=data, connection=self)
 
     def get_all_realms(self, region, raw=False):
         data = self.make_request(region, '/realm/status')
@@ -134,3 +152,21 @@ class Connection(object):
             return data['realms'][0]
 
         return Realm(self, region, data=data['realms'][0], connection=self)
+
+    # TODO: wrap these!
+
+    def get_character_classes(self, region, raw=False):
+        data = self.make_request(region, '/data/character/classes')
+        return data['classes']
+        
+    def get_character_races(self, region, raw=False):
+        data = self.make_request(region, '/data/character/races')
+        return data['races']
+
+    def get_guild_perks(self, region, raw=False):
+        data = self.make_request(region, '/data/guild/perks')
+        return data['perks']
+
+    def get_guild_rewards(self, region, raw=False):
+        data = self.make_request(region, '/data/guild/rewards')
+        return data['rewards']
