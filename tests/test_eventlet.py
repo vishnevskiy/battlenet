@@ -3,7 +3,10 @@ import eventlet
 import os
 import battlenet
 
-battlenet.Connection.setup(app=os.environ.get('BATTLENET_APP'), eventlet=True)
+PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY', None)
+PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY', None)
+
+battlenet.Connection.setup(public_key = PUBLIC_KEY, private_key = PRIVATE_KEY, eventlet = True)
 
 class EventletTest(unittest.TestCase):
     def setUp(self):

@@ -5,7 +5,10 @@ import os
 import battlenet
 from battlenet import Character
 
-battlenet.Connection.setup(app=os.environ.get('BATTLENET_APP'))
+PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY', None)
+PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY', None)
+
+battlenet.Connection.setup(public_key = PUBLIC_KEY, private_key = PRIVATE_KEY)
 
 class CharacterTest(unittest.TestCase):
     def test_general(self):

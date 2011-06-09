@@ -92,7 +92,6 @@ class Connection(object):
             raise APIError('HTTP 404')
 
         try:
-            print response
             data = simplejson.loads(response.read())
         except simplejson.JSONDecodeError:
             raise APIError('Non-JSON Response')
