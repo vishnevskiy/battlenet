@@ -5,7 +5,7 @@ import hmac
 import sha
 import time
 import urlparse
-from .things import Character, Realm, Guild
+from .things import Character, Realm, Guild, Reward, Perk
 from .exceptions import APIError, RealmNotFound
 from .utils import slugify, quote
 
@@ -153,20 +153,40 @@ class Connection(object):
 
         return Realm(self, region, data=data['realms'][0], connection=self)
 
-    # TODO: wrap these!
+    def get_guild_perks(self, region, raw=False):
+        name = '__%s_guild_perks' % region
+        
+        if not hasattr(self, name):
+            data = self.make_request(region, '/data/guild/perks')
+            setattr(self, name, data['perks'])
+            perks = data['perks']
+        else:
+            perks = getattr(self, name)
 
-    def get_character_classes(self, region, raw=False):
+        if raw:
+            return perks
+
+        return [Perk(region, perk) for perk in perks]
+
+    def get_guild_rewards(self, region, raw=False):
+        name = '__%s_guild_rewards' % region
+
+        if not hasattr(self, name):
+            data = self.make_request(region, '/data/guild/rewards')
+            setattr(self, name, data['rewards'])
+            rewards = data['rewards']
+        else:
+            rewards = getattr(self, name)
+
+        if raw:
+            return rewards
+
+        return [Reward(region, reward) for reward in rewards]
+
+    def get_character_classes(self, region):
         data = self.make_request(region, '/data/character/classes')
         return data['classes']
         
-    def get_character_races(self, region, raw=False):
+    def get_character_races(self, region):
         data = self.make_request(region, '/data/character/races')
         return data['races']
-
-    def get_guild_perks(self, region, raw=False):
-        data = self.make_request(region, '/data/guild/perks')
-        return data['perks']
-
-    def get_guild_rewards(self, region, raw=False):
-        data = self.make_request(region, '/data/guild/rewards')
-        return data['rewards']

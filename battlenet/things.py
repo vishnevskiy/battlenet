@@ -18,16 +18,6 @@ class Thing(object):
     def to_json(self):
         return json.dumps(self._data)
 
-    def _refresh_if_not_present(self, field):
-        if not hasattr(self, '_' + field):
-            if field not in self._data:
-                self.refresh(field)
-
-            return True
-
-    def refresh(self, *fields):
-        raise NotImplementedError
-
     def __repr__(self):
         return '<%s>' % (self.__class__.__name__,)
 
@@ -39,8 +29,33 @@ class Thing(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-    
-class Character(Thing):
+
+class LazyThing(Thing):
+    def __init__(self, data, fields=None):
+        Thing.__init__(self, data)
+        self._fields = set(fields or [])
+
+    def _refresh_if_not_present(self, field):
+        if not hasattr(self, '_' + field):
+            if field not in self._data:
+                self.refresh(field)
+
+            return True
+
+    def _delete_property_fields(self):
+        for field in self._fields:
+            try:
+                delattr(self, '_' + field)
+            except AttributeError:
+                pass
+
+    def _populate_data(self, data):
+        raise NotImplementedError
+
+    def refresh(self, *fields):
+        raise NotImplementedError
+
+class Character(LazyThing):
     MALE = 'male'
     FEMALE = 'female'
 
@@ -113,7 +128,7 @@ class Character(Thing):
         if realm and name and not data:
             data = self.connection.get_character(region, realm, name, raw=True, fields=self._fields)
 
-        self.populate(data)
+        self._populate_data(data)
 
     def __str__(self):
         return self.name
@@ -129,7 +144,7 @@ class Character(Thing):
             and self.name == other.name \
             and self.get_realm_name() == other.get_realm_name()
 
-    def populate(self, data):
+    def _populate_data(self, data):
         self._data = data
 
         self.name = normalize(data['name'])
@@ -138,9 +153,13 @@ class Character(Thing):
         self.race = data['race']
         self.thumbnail = data['thumbnail']
         self.gender = data['gender']
-        self.last_modified = datetime.datetime.fromtimestamp(data['lastModified'] / 1000) if 'lastModified' in data else None
         self.achievement_points = data['achievementPoints']
         self.faction = RACE_TO_FACTION[self.race]
+
+        if 'lastModified' in data:
+            self.last_modified = datetime.datetime.fromtimestamp(data['lastModified'] / 1000)
+        else:
+            self.last_modified = None
 
         if 'pets' in data:
             self.pets = [Pet(pet) for pet in self._data['pets']]
@@ -236,14 +255,10 @@ class Character(Thing):
         for field in fields:
             self._fields.add(field)
             
-        self.populate(self.connection.get_character(self.region, self._data['realm'],
+        self._populate_data(self.connection.get_character(self.region, self._data['realm'],
             self.name, raw=True, fields=self._fields))
 
-        for field in self._fields:
-            try:
-                delattr(self, '_' + field)
-            except AttributeError:
-                pass
+        self._delete_property_fields()
 
     def get_realm_name(self):
         return normalize(self._data['realm'])
@@ -307,7 +322,7 @@ class Reputation(Thing):
     def percent(self):
         return int(100.0 * self.value / self.max)
 
-class Guild(Thing):
+class Guild(LazyThing):
     ACHIEVEMENTS = 'achievements'
     MEMBERS = 'members'
     ALL_FIELDS = [ACHIEVEMENTS, MEMBERS]
@@ -322,7 +337,7 @@ class Guild(Thing):
             data = self.connection.get_guild(region, realm, name, raw=True, fields=self._fields)
             data['realm'] = realm # Copy over realm since API does not provide it!
 
-        self.populate(data)
+        self._populate_data(data)
 
     def __len__(self):
         return len(self.members)
@@ -333,7 +348,7 @@ class Guild(Thing):
     def __repr__(self):
         return '<%s: %s@%s>' % (self.__class__.__name__, self.name, self._data['realm'])
 
-    def populate(self, data):
+    def _populate_data(self, data):
         if hasattr(self, '_data'):
             data['realm'] = self._data['realm'] # Copy over realm since API does not provide it!
 
@@ -349,14 +364,40 @@ class Guild(Thing):
         for field in fields:
             self._fields.add(field)
 
-        self.populate(self.connection.get_guild(self.region, self._data['realm'],
+        self._populate_data(self.connection.get_guild(self.region, self._data['realm'],
             self.name, raw=True, fields=self._fields))
 
-        for field in self._fields:
-            try:
-                delattr(self, '_' + field)
-            except AttributeError:
-                pass
+        self._delete_property_fields()
+
+    @property
+    def perks(self):
+        return [perk for perk in self.connection.get_guild_perks(self.region) if perk.guild_level <= self.level]
+
+    @property
+    def rewards(self):
+        return [reward for reward in self.connection.get_guild_rewards(self.region)
+                if reward.min_guild_level <= self.level]
+
+    @property
+    def achievements(self):
+        if self._refresh_if_not_present(Guild.ACHIEVEMENTS):
+            self._achievements = {}
+
+            achievements_completed = self._data['achievements']['achievementsCompleted']
+            achievements_completed_ts = self._data['achievements']['achievementsCompletedTimestamp']
+
+            for id_, timestamp in zip(achievements_completed, achievements_completed_ts):
+                self._achievements[id_] = datetime.datetime.fromtimestamp(timestamp / 1000)
+
+#            criteria = self._data['achievements']['criteria']
+#            criteria_quantity = self._data['achievements']['criteriaQuantity']
+#            criteria_created = self._data['achievements']['criteriaCreated']
+#            criteria_ts = self._data['achievements']['criteriaTimestamp']
+#
+#            for id_, quantity, created, timestamp in zip(criteria, criteria_quantity, criteria_created, criteria_ts):
+#                pass
+
+        return self._achievements
 
     @property
     def members(self):
@@ -374,17 +415,17 @@ class Guild(Thing):
 
         return self._members
 
-    def get_leader(self):
-        for member in self.members:
-            if member['rank'] is 0:
-                return member['character']
-
     @property
     def realm(self):
         if not hasattr(self, '_realm'):
             self._realm = Realm(self.region, self._data['realm'], connection=self.connection)
 
         return self._realm
+
+    def get_leader(self):
+        for member in self.members:
+            if member['rank'] is 0:
+                return member['character']
 
     def get_realm_name(self):
         return normalize(self._data['realm'])
@@ -406,7 +447,7 @@ class Realm(Thing):
         if name and not data:
             data = self.connection.get_realm(region, name, raw=True)
 
-        self.populate(data)
+        self._populate_data(data)
 
     def __str__(self):
         return self.name
@@ -414,7 +455,7 @@ class Realm(Thing):
     def __repr__(self):
         return '<%s: %s(%s)>' % (self.__class__.__name__, self.name, self.region.upper())
 
-    def populate(self, data):
+    def _populate_data(self, data):
         self._data = data
 
         self.name = normalize(data['name'])
@@ -425,7 +466,7 @@ class Realm(Thing):
         self.type = data['type']
 
     def refresh(self):
-        self.populate(self.connection.get_realm(self.name))
+        self._populate_data(self.connection.get_realm(self.name, raw=True))
 
     def has_queue(self):
         return self.queue
@@ -437,8 +478,8 @@ class Realm(Thing):
         return not self.status
 
 class Item(Thing):
-    def __init__(self, character, data):
-        self._character = character
+    def __init__(self, region, data):
+        self._region = region
         self._data = data
 
         self.id = data['id']
@@ -467,7 +508,7 @@ class Item(Thing):
         return QUALITY.get(self.quality, 'Unknown')
 
     def get_icon_url(self, size='large'):
-        return make_icon_url(self._character.region, self.icon, size)
+        return make_icon_url(self._region, self.icon, size)
 
 class Stats(Thing):
     def __init__(self, character, data):
@@ -592,27 +633,27 @@ class Equipment(Thing):
         self.average_item_level = data['averageItemLevel']
         self.average_item_level_equiped = data['averageItemLevelEquipped']
 
-        self.main_hand = Item(self._character, data['mainHand']) if data.get('mainHand') else None
-        self.off_hand = Item(self._character, data['offHand']) if data.get('offHand') else None
-        self.ranged = Item(self._character, data['ranged']) if data.get('ranged') else None
+        self.main_hand = Item(self._character.region, data['mainHand']) if data.get('mainHand') else None
+        self.off_hand = Item(self._character.region, data['offHand']) if data.get('offHand') else None
+        self.ranged = Item(self._character.region, data['ranged']) if data.get('ranged') else None
 
-        self.head = Item(self._character, data['head']) if data.get('head') else None
-        self.neck = Item(self._character, data['neck']) if data.get('neck') else None
-        self.shoulder = Item(self._character, data['shoulder']) if data.get('shoulder') else None
-        self.back = Item(self._character, data['back']) if data.get('back') else None
-        self.chest = Item(self._character, data['chest']) if data.get('chest') else None
-        self.shirt = Item(self._character, data['shirt']) if data.get('shirt') else None
-        self.tabard = Item(self._character, data['tabard']) if data.get('tabard') else None
-        self.wrist = Item(self._character, data['wrist']) if data.get('wrist') else None
+        self.head = Item(self._character.region, data['head']) if data.get('head') else None
+        self.neck = Item(self._character.region, data['neck']) if data.get('neck') else None
+        self.shoulder = Item(self._character.region, data['shoulder']) if data.get('shoulder') else None
+        self.back = Item(self._character.region, data['back']) if data.get('back') else None
+        self.chest = Item(self._character.region, data['chest']) if data.get('chest') else None
+        self.shirt = Item(self._character.region, data['shirt']) if data.get('shirt') else None
+        self.tabard = Item(self._character.region, data['tabard']) if data.get('tabard') else None
+        self.wrist = Item(self._character.region, data['wrist']) if data.get('wrist') else None
 
-        self.hands = Item(self._character, data['hands']) if data.get('hands') else None
-        self.waist = Item(self._character, data['waist']) if data.get('waist') else None
-        self.legs = Item(self._character, data['legs']) if data.get('legs') else None
-        self.feet = Item(self._character, data['feet']) if data.get('feet') else None
-        self.finger1 = Item(self._character, data['finger1']) if data.get('finger1') else None
-        self.finger2 = Item(self._character, data['finger2']) if data.get('finger2') else None
-        self.trinket1 = Item(self._character, data['trinket1']) if data.get('trinket1') else None
-        self.trinket2 = Item(self._character, data['trinket2']) if data.get('trinket2') else None
+        self.hands = Item(self._character.region, data['hands']) if data.get('hands') else None
+        self.waist = Item(self._character.region, data['waist']) if data.get('waist') else None
+        self.legs = Item(self._character.region, data['legs']) if data.get('legs') else None
+        self.feet = Item(self._character.region, data['feet']) if data.get('feet') else None
+        self.finger1 = Item(self._character.region, data['finger1']) if data.get('finger1') else None
+        self.finger2 = Item(self._character.region, data['finger2']) if data.get('finger2') else None
+        self.trinket1 = Item(self._character.region, data['trinket1']) if data.get('trinket1') else None
+        self.trinket2 = Item(self._character.region, data['trinket2']) if data.get('trinket2') else None
 
     def __getitem__(self, item):
         try:
@@ -696,3 +737,52 @@ class Pet(Thing):
     
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.name)
+
+class Perk(Thing):
+    def __init__(self, region, data):
+        self._region = region
+        self._data = data
+
+        self.id = data['spell']['id']
+        self.name = data['spell']['name']
+        self.description = data['spell']['description']
+        self.subtext = data['spell']['subtext']
+        self.cooldown = data['spell']['cooldown']['cooldown'] if 'cooldown' in data['spell'] else None
+        self.cast_time = data['spell'].get('castTime')
+        self.icon = data['spell'].get('icon')
+        self.range = data['spell'].get('range')
+        self.guild_level = data['guildLevel']
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        if self.subtext:
+            return '<%s: %s [%s]>' % (self.__class__.__name__, self.name, self.subtext)
+
+        return '<%s: %s>' % (self.__class__.__name__, self.name)
+
+    def get_icon_url(self, size='large'):
+        if not self.icon:
+            return ''
+
+        return make_icon_url(self._region, self.icon, size)
+
+class Reward(Thing):
+    def __init__(self, region, data):
+        self._data = data
+
+        self.min_guild_level = data['minGuildLevel']
+        self.min_guild_reputation = data['minGuildRepLevel']
+        self.races = data.get('races', [])
+        self.achievement = data.get('achievement')
+        self.item = Item(region, data['item'])
+
+    def __str__(self):
+        return self.item.name
+
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__, str(self))
+    
+    def get_race_names(self):
+        return [RACE[race] for race in self.races]

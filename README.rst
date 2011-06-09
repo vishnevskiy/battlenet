@@ -23,7 +23,7 @@ Global connection settings can be setup so that objects can make connections imp
 
     from battlenet import Connection
 
-    Connection.setup(app='app key')
+    Connection.setup(public_key='your public key', private_key='your private key')
 
 You can also create connections explicitly.
 
@@ -31,7 +31,7 @@ You can also create connections explicitly.
 
     from battlenet import Connection
 
-    connection = Connection('app key')
+    connection = Connection(public_key='your public key', private_key='your private key')
 
 Fetching a specific realm
 -------------------------
@@ -72,16 +72,37 @@ Fetching a character
     from battlenet import Character
 
     # If a global connection was setup
-    realm = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.GUILD])
+    character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.GUILD])
 
     # Using a specific connection
-    realm = connection.get_character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.GUILD]))
+    character = connection.get_character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.GUILD])
 
     print character.name
     # => Vishnevskiy
 
     print character.guild.name
     # => Excellence
+
+
+Fetching a guild
+----------------------
+
+::
+
+    from battlenet import Character
+
+    # If a global connection was setup
+    guild = Guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence')
+
+    # Using a specific connection
+    guild = connection.get_guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence')
+
+    print guild.name
+    # => Vishnevskiy
+
+    leader = guild.get_leader()
+    print leader.name
+    # => Clí
 
 More Examples
 ----------------------
