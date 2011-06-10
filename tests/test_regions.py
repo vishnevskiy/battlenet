@@ -5,6 +5,7 @@ import battlenet
 PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY')
 PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')
 
+
 class RegionsTest(unittest.TestCase):
     def setUp(self):
         self.connection = battlenet.Connection(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY)
@@ -30,4 +31,3 @@ class RegionsTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

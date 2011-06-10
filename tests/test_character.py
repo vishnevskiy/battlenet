@@ -10,6 +10,7 @@ PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')
 
 battlenet.Connection.setup(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY)
 
+
 class CharacterTest(unittest.TestCase):
     def test_general(self):
         character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy')
@@ -70,7 +71,7 @@ class CharacterTest(unittest.TestCase):
 
     def test_appearance(self):
         character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.APPEARANCE])
-        
+
         self.assertEqual(character.appearance.face, 2)
         self.assertEqual(character.appearance.feature, 9)
         self.assertEqual(character.appearance.hair_color, 3)
@@ -85,7 +86,7 @@ class CharacterTest(unittest.TestCase):
 
     def test_unicode(self):
         character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Clí')
-        
+
         self.assertEqual(character.name, 'Clí')
 
     def test_pet_class(self):
@@ -93,7 +94,6 @@ class CharacterTest(unittest.TestCase):
 
         self.assertTrue(hasattr(character, 'pets'))
         self.assertIn('Rudebull', [pet.name for pet in character.pets])
-
 
 if __name__ == '__main__':
     unittest.main()

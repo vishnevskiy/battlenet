@@ -26,7 +26,9 @@ URL_FORMAT = 'http://%(region)s.battle.net/api/%(game)s%(path)s?%(params)s'
 logger = logging.getLogger('battlenet')
 
 DAYS = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun',)
-MONTHS = ('', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',)
+MONTHS = ('', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+          'Aug', 'Sep', 'Oct', 'Nov', 'Dec',)
+
 
 class Connection(object):
     defaults = {
@@ -35,9 +37,11 @@ class Connection(object):
         'private_key': None
     }
 
-    def __init__(self, public_key=None, private_key=None, game='wow', eventlet=None):
-        self.public_key = public_key or  Connection.defaults.get('public_key')
-        self.private_key = private_key or  Connection.defaults.get('private_key')
+    def __init__(self, public_key=None, private_key=None,
+                 game='wow', eventlet=None):
+
+        self.public_key = public_key or __class__.defaults.get('public_key')
+        self.private_key = private_key or __class__.defaults.get('private_key')
         self.game = game
         self.eventlet = eventlet or Connection.defaults.get('eventlet', False)
 
@@ -56,14 +60,15 @@ class Connection(object):
 
     def sign_request(self, method, now, url, private_key):
         string_to_sign = '%s\n%s\n%s\n' % (method, now, url)
-        return base64.encodestring(hmac.new(private_key, string_to_sign, sha).digest()).rstrip()
+        hash = hmac.new(private_key, string_to_sign, sha).digest()
+        return base64.encodestring(hash).rstrip()
 
     def make_request(self, region, path, params=None):
         params = params or {}
 
         now = time.gmtime()
-        date = '%s, %2d %s %d %2d:%02d:%02d GMT' % \
-               (DAYS[now[6]], now[2], MONTHS[now[1]], now[0], now[3], now[4], now[5])
+        date = '%s, %2d %s %d %2d:%02d:%02d GMT' % (DAYS[now[6]], now[2],
+            MONTHS[now[1]], now[0], now[3], now[4], now[5])
 
         headers = {
             'Date': date
@@ -73,7 +78,8 @@ class Connection(object):
             'region': region,
             'game': self.game,
             'path': path,
-            'params': '&'.join('='.join((k, ','.join(v) if isinstance(v, (set, list, tuple)) else v))
+            'params': '&'.join('='.join(
+                (k, ','.join(v) if isinstance(v, (set, list)) else v))
                 for k, v in params.items() if v)
         }
 
@@ -84,15 +90,15 @@ class Connection(object):
             headers['Authorization'] = 'BNET %s:%s' % (self.public_key, signature)
 
         logger.debug('Battle.net => ' + url)
-        
+
         try:
             request = urllib2.Request(url, None, headers)
             if self.eventlet and eventlet_urllib2:
                 response = eventlet_urllib2.urlopen(request)
             else:
                 response = urllib2.urlopen(request)
-        except urllib2.URLError:
-            raise APIError('HTTP 404')
+        except urllib2.URLError, e:
+            raise APIError('HTTP %s' % e.code)
 
         try:
             data = json.loads(response.read())
@@ -155,7 +161,7 @@ class Connection(object):
 
     def get_guild_perks(self, region, raw=False):
         name = '__%s_guild_perks' % region
-        
+
         if not hasattr(self, name):
             data = self.make_request(region, '/data/guild/perks')
             setattr(self, name, data['perks'])
@@ -186,7 +192,7 @@ class Connection(object):
     def get_character_classes(self, region):
         data = self.make_request(region, '/data/character/classes')
         return data['classes']
-        
+
     def get_character_races(self, region):
         data = self.make_request(region, '/data/character/races')
         return data['races']
