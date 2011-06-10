@@ -11,6 +11,7 @@ PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')
 
 battlenet.Connection.setup(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY)
 
+
 class GuildTest(unittest.TestCase):
     def test_general(self):
         guild = Guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence')
@@ -24,20 +25,20 @@ class GuildTest(unittest.TestCase):
 
     def test_len(self):
         guild = Guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence', fields=[Guild.MEMBERS])
-        
+
         self.assertGreater(len(guild), 1)
 
     def test_leader(self):
         guild = Guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence', fields=[Guild.MEMBERS])
 
-        character =  guild.get_leader()
+        character = guild.get_leader()
 
         self.assertEqual(character.name, 'Clí')
 
     def test_lazyload_member_character(self):
         guild = Guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence')
 
-        character =  guild.get_leader()
+        character = guild.get_leader()
 
         self.assertRegexpMatches(character.get_full_class_name(), r'^(Holy|Protection|Retribution) Paladin$')
 

@@ -4,6 +4,7 @@ import unittest
 import battlenet
 from battlenet import Realm
 
+
 class RealmTest(unittest.TestCase):
     def setUp(self):
         self.connection = battlenet.Connection()

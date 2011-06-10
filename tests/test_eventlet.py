@@ -8,6 +8,7 @@ PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')
 
 battlenet.Connection.setup(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY, eventlet=True)
 
+
 class EventletTest(unittest.TestCase):
     def setUp(self):
         self.pool = eventlet.GreenPool()
@@ -17,7 +18,7 @@ class EventletTest(unittest.TestCase):
 
         def get_character(name):
             return battlenet.Character(battlenet.UNITED_STATES, 'Nazjatar', name)
-        
+
         for i, character in enumerate(self.pool.imap(get_character, names)):
             self.assertEqual(character.name, names[i])
 

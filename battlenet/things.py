@@ -11,6 +11,7 @@ except ImportError:
 
 __all__ = ['Character', 'Guild', 'Realm']
 
+
 class Thing(object):
     def __init__(self, data):
         self._data = data
@@ -29,6 +30,7 @@ class Thing(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
 
 class LazyThing(Thing):
     def __init__(self, data, fields=None):
@@ -54,6 +56,7 @@ class LazyThing(Thing):
 
     def refresh(self, *fields):
         raise NotImplementedError
+
 
 class Character(LazyThing):
     MALE = 'male'
@@ -139,7 +142,7 @@ class Character(LazyThing):
     def __eq__(self, other):
         if not isinstance(other, Character):
             return False
-        
+
         return self.connection == other.connection \
             and self.name == other.name \
             and self.get_realm_name() == other.get_realm_name()
@@ -180,8 +183,8 @@ class Character(LazyThing):
             }
 
             for type_ in professions.keys():
-                 professions[type_] = [Profession(self, profession)
-                     for profession in self._data[Character.PROFESSIONS][type_]]
+                professions[type_] = [Profession(self, profession)
+                    for profession in self._data[Character.PROFESSIONS][type_]]
 
             self._professions = professions
 
@@ -191,7 +194,7 @@ class Character(LazyThing):
     def equipment(self):
         if self._refresh_if_not_present(Character.ITEMS):
             self._items = Equipment(self, self._data[Character.ITEMS])
-            
+
         return self._items
 
     @property
@@ -256,7 +259,7 @@ class Character(LazyThing):
     def refresh(self, *fields):
         for field in fields:
             self._fields.add(field)
-            
+
         self._populate_data(self.connection.get_character(self.region, self._data['realm'],
             self.name, raw=True, fields=self._fields))
 
@@ -290,11 +293,12 @@ class Character(LazyThing):
             'path': self.thumbnail
         }
 
+
 class Title(Thing):
     def __init__(self, character, data):
         self._character = character
         self._data = data
-        
+
         self.id = data['id']
         self.format = data['name']
 
@@ -303,6 +307,7 @@ class Title(Thing):
 
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.format)
+
 
 class Reputation(Thing):
     def __init__(self, data):
@@ -324,196 +329,6 @@ class Reputation(Thing):
     def percent(self):
         return int(100.0 * self.value / self.max)
 
-class Guild(LazyThing):
-    ACHIEVEMENTS = 'achievements'
-    MEMBERS = 'members'
-    ALL_FIELDS = [ACHIEVEMENTS, MEMBERS]
-
-    def __init__(self, region, realm=None, name=None, data=None, fields=None, connection=None):
-        self.region = region
-        self.connection = connection or make_connection()
-
-        self._fields = set(fields or [])
-
-        if realm and name:
-            data = self.connection.get_guild(region, realm, name, raw=True, fields=self._fields)
-            data['realm'] = realm # Copy over realm since API does not provide it!
-
-        self._populate_data(data)
-
-    def __len__(self):
-        if 'members' in self._data and isinstance(self._data['members'], int):
-            return self._data['members']
-        
-        return len(self.members)
-
-    def __str__(self):
-        return self.name
-    
-    def __repr__(self):
-        return '<%s: %s@%s>' % (self.__class__.__name__, self.name, self._data['realm'])
-
-    def _populate_data(self, data):
-        if hasattr(self, '_data'):
-            data['realm'] = self._data['realm'] # Copy over realm since API does not provide it!
-
-        self._data = data
-
-        self.name = normalize(data['name'])
-        self.level = data['level']
-        self.emblem = Emblem(data['emblem']) if 'emblem' in data else None
-        self.achievement_points = data['achievementPoints']
-        self.faction = data['side'].capitalize()
-
-    def refresh(self, *fields):
-        for field in fields:
-            self._fields.add(field)
-
-        self._populate_data(self.connection.get_guild(self.region, self._data['realm'],
-            self.name, raw=True, fields=self._fields))
-
-        self._delete_property_fields()
-
-    @property
-    def perks(self):
-        return [perk for perk in self.connection.get_guild_perks(self.region) if perk.guild_level <= self.level]
-
-    @property
-    def rewards(self):
-        return [reward for reward in self.connection.get_guild_rewards(self.region)
-                if reward.min_guild_level <= self.level]
-
-    @property
-    def achievements(self):
-        if self._refresh_if_not_present(Guild.ACHIEVEMENTS):
-            self._achievements = {}
-
-            achievements_completed = self._data['achievements']['achievementsCompleted']
-            achievements_completed_ts = self._data['achievements']['achievementsCompletedTimestamp']
-
-            for id_, timestamp in zip(achievements_completed, achievements_completed_ts):
-                self._achievements[id_] = datetime.datetime.fromtimestamp(timestamp / 1000)
-
-#            criteria = self._data['achievements']['criteria']
-#            criteria_quantity = self._data['achievements']['criteriaQuantity']
-#            criteria_created = self._data['achievements']['criteriaCreated']
-#            criteria_ts = self._data['achievements']['criteriaTimestamp']
-#
-#            for id_, quantity, created, timestamp in zip(criteria, criteria_quantity, criteria_created, criteria_ts):
-#                pass
-
-        return self._achievements
-
-    @property
-    def members(self):
-        if self._refresh_if_not_present(Guild.MEMBERS):
-            self._members = []
-
-            for member in self._data[Guild.MEMBERS]:
-                character = Character(self.region, data=member['character'], connection=self.connection)
-                character._guild = self
-
-                self._members.append({
-                    'character': character,
-                    'rank': member['rank']
-                })
-
-        return self._members
-
-    @property
-    def realm(self):
-        if not hasattr(self, '_realm'):
-            self._realm = Realm(self.region, self._data['realm'], connection=self.connection)
-
-        return self._realm
-
-    def get_leader(self):
-        for member in self.members:
-            if member['rank'] is 0:
-                return member['character']
-
-    def get_realm_name(self):
-        return normalize(self._data['realm'])
-
-class Realm(Thing):
-    PVP = 'pvp'
-    PVE = 'pve'
-    RP = 'rp'
-    RPPVP = 'rppvp'
-
-    HIGH = 'high'
-    MEDIUM = 'medium'
-    LOW = 'low'
-
-    def __init__(self, region, name=None, data=None, connection=None):
-        self.region = region
-        self.connection = connection or make_connection()
-
-        if name and not data:
-            data = self.connection.get_realm(region, name, raw=True)
-
-        self._populate_data(data)
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return '<%s: %s(%s)>' % (self.__class__.__name__, self.name, self.region.upper())
-
-    def _populate_data(self, data):
-        self._data = data
-
-        self.name = normalize(data['name'])
-        self.slug = data['slug']
-        self.status = data['status']
-        self.queue = data['queue']
-        self.population = data['population']
-        self.type = data['type']
-
-    def refresh(self):
-        self._populate_data(self.connection.get_realm(self.name, raw=True))
-
-    def has_queue(self):
-        return self.queue
-
-    def is_online(self):
-        return self.status
-
-    def is_offline(self):
-        return not self.status
-
-class Item(Thing):
-    def __init__(self, region, data):
-        self._region = region
-        self._data = data
-
-        self.id = data['id']
-        self.name = data['name']
-        self.quality = data['quality']
-        self.icon = data['icon']
-
-        self.reforge = data['tooltipParams'].get('reforge')
-        self.set = data['tooltipParams'].get('set')
-        self.enchant = data['tooltipParams'].get('enchant')
-        self.extra_socket = data['tooltipParams'].get('extraSocket', False)
-
-        self.gems = collections.defaultdict(lambda: None)
-
-        for key, value in data['tooltipParams'].items():
-            if key.startswith('gem'):
-                self.gems[int(key[3:])] = value
-
-    def __str__(self):
-        return self.name
-                
-    def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.name)
-
-    def get_quality_name(self):
-        return QUALITY.get(self.quality, 'Unknown')
-
-    def get_icon_url(self, size='large'):
-        return make_icon_url(self._region, self.icon, size)
 
 class Stats(Thing):
     def __init__(self, character, data):
@@ -608,10 +423,11 @@ class Stats(Thing):
 
         return percent
 
+
 class Appearance(Thing):
     def __init__(self, data):
         self._data = data
-        
+
         self.face = data['faceVariation']
         self.feature = data['featureVariation']
         self.hair = data['hairVariation']
@@ -620,15 +436,6 @@ class Appearance(Thing):
         self.show_helm = data['showHelm']
         self.skin_color = data['skinColor']
 
-class Emblem(Thing):
-    def __init__(self, data):
-        self._data = data
-
-        self.border = data['border']
-        self.border_color = data['borderColor']
-        self.icon = data['icon']
-        self.icon_color = data['iconColor']
-        self.background_color = data['backgroundColor']
 
 class Equipment(Thing):
     def __init__(self, character, data):
@@ -666,6 +473,7 @@ class Equipment(Thing):
         except AttributeError:
             raise IndexError
 
+
 class Build(Thing):
     def __init__(self, character, data):
         self._character = character
@@ -692,6 +500,7 @@ class Build(Thing):
     def get_icon_url(self, size='large'):
         return make_icon_url(self._character.region, self.icon, size)
 
+
 class Glyph(Thing):
     def __init__(self, character, data):
         self._character = character
@@ -711,6 +520,7 @@ class Glyph(Thing):
     def get_icon_url(self, size='large'):
         return make_icon_url(self._character.region, self.icon, size)
 
+
 class Profession(Thing):
     def __init__(self, character, data):
         self._character = character
@@ -729,6 +539,7 @@ class Profession(Thing):
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.name)
 
+
 class Pet(Thing):
     def __init__(self, data):
         self._data = data
@@ -739,9 +550,133 @@ class Pet(Thing):
 
     def __str__(self):
         return self.name
-    
+
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.name)
+
+
+class Guild(LazyThing):
+    ACHIEVEMENTS = 'achievements'
+    MEMBERS = 'members'
+    ALL_FIELDS = [ACHIEVEMENTS, MEMBERS]
+
+    def __init__(self, region, realm=None, name=None, data=None, fields=None, connection=None):
+        self.region = region
+        self.connection = connection or make_connection()
+
+        self._fields = set(fields or [])
+
+        if realm and name:
+            data = self.connection.get_guild(region, realm, name, raw=True, fields=self._fields)
+            data['realm'] = realm  # Copy over realm since API does not provide it!
+
+        self._populate_data(data)
+
+    def __len__(self):
+        if 'members' in self._data and isinstance(self._data['members'], int):
+            return self._data['members']
+
+        return len(self.members)
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<%s: %s@%s>' % (self.__class__.__name__, self.name, self._data['realm'])
+
+    def _populate_data(self, data):
+        if hasattr(self, '_data'):
+            data['realm'] = self._data['realm']  # Copy over realm since API does not provide it!
+
+        self._data = data
+
+        self.name = normalize(data['name'])
+        self.level = data['level']
+        self.emblem = Emblem(data['emblem']) if 'emblem' in data else None
+        self.achievement_points = data['achievementPoints']
+        self.faction = data['side'].capitalize()
+
+    def refresh(self, *fields):
+        for field in fields:
+            self._fields.add(field)
+
+        self._populate_data(self.connection.get_guild(self.region, self._data['realm'],
+            self.name, raw=True, fields=self._fields))
+
+        self._delete_property_fields()
+
+    @property
+    def perks(self):
+        return [perk for perk in self.connection.get_guild_perks(self.region) if perk.guild_level <= self.level]
+
+    @property
+    def rewards(self):
+        return [reward for reward in self.connection.get_guild_rewards(self.region)
+                if reward.min_guild_level <= self.level]
+
+    @property
+    def achievements(self):
+        if self._refresh_if_not_present(Guild.ACHIEVEMENTS):
+            self._achievements = {}
+
+            achievements_completed = self._data['achievements']['achievementsCompleted']
+            achievements_completed_ts = self._data['achievements']['achievementsCompletedTimestamp']
+
+            for id_, timestamp in zip(achievements_completed, achievements_completed_ts):
+                self._achievements[id_] = datetime.datetime.fromtimestamp(timestamp / 1000)
+
+#            criteria = self._data['achievements']['criteria']
+#            criteria_quantity = self._data['achievements']['criteriaQuantity']
+#            criteria_created = self._data['achievements']['criteriaCreated']
+#            criteria_ts = self._data['achievements']['criteriaTimestamp']
+#
+#            for id_, quantity, created, timestamp in zip(criteria, criteria_quantity, criteria_created, criteria_ts):
+#                pass
+
+        return self._achievements
+
+    @property
+    def members(self):
+        if self._refresh_if_not_present(Guild.MEMBERS):
+            self._members = []
+
+            for member in self._data[Guild.MEMBERS]:
+                character = Character(self.region, data=member['character'], connection=self.connection)
+                character._guild = self
+
+                self._members.append({
+                    'character': character,
+                    'rank': member['rank']
+                })
+
+        return self._members
+
+    @property
+    def realm(self):
+        if not hasattr(self, '_realm'):
+            self._realm = Realm(self.region, self._data['realm'], connection=self.connection)
+
+        return self._realm
+
+    def get_leader(self):
+        for member in self.members:
+            if member['rank'] is 0:
+                return member['character']
+
+    def get_realm_name(self):
+        return normalize(self._data['realm'])
+
+
+class Emblem(Thing):
+    def __init__(self, data):
+        self._data = data
+
+        self.border = data['border']
+        self.border_color = data['borderColor']
+        self.icon = data['icon']
+        self.icon_color = data['iconColor']
+        self.background_color = data['backgroundColor']
+
 
 class Perk(Thing):
     def __init__(self, region, data):
@@ -773,6 +708,7 @@ class Perk(Thing):
 
         return make_icon_url(self._region, self.icon, size)
 
+
 class Reward(Thing):
     def __init__(self, region, data):
         self._data = data
@@ -788,6 +724,88 @@ class Reward(Thing):
 
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, str(self))
-    
+
     def get_race_names(self):
         return [RACE[race] for race in self.races]
+
+
+class Realm(Thing):
+    PVP = 'pvp'
+    PVE = 'pve'
+    RP = 'rp'
+    RPPVP = 'rppvp'
+
+    HIGH = 'high'
+    MEDIUM = 'medium'
+    LOW = 'low'
+
+    def __init__(self, region, name=None, data=None, connection=None):
+        self.region = region
+        self.connection = connection or make_connection()
+
+        if name and not data:
+            data = self.connection.get_realm(region, name, raw=True)
+
+        self._populate_data(data)
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<%s: %s(%s)>' % (self.__class__.__name__, self.name, self.region.upper())
+
+    def _populate_data(self, data):
+        self._data = data
+
+        self.name = normalize(data['name'])
+        self.slug = data['slug']
+        self.status = data['status']
+        self.queue = data['queue']
+        self.population = data['population']
+        self.type = data['type']
+
+    def refresh(self):
+        self._populate_data(self.connection.get_realm(self.name, raw=True))
+
+    def has_queue(self):
+        return self.queue
+
+    def is_online(self):
+        return self.status
+
+    def is_offline(self):
+        return not self.status
+
+
+class Item(Thing):
+    def __init__(self, region, data):
+        self._region = region
+        self._data = data
+
+        self.id = data['id']
+        self.name = data['name']
+        self.quality = data['quality']
+        self.icon = data['icon']
+
+        self.reforge = data['tooltipParams'].get('reforge')
+        self.set = data['tooltipParams'].get('set')
+        self.enchant = data['tooltipParams'].get('enchant')
+        self.extra_socket = data['tooltipParams'].get('extraSocket', False)
+
+        self.gems = collections.defaultdict(lambda: None)
+
+        for key, value in data['tooltipParams'].items():
+            if key.startswith('gem'):
+                self.gems[int(key[3:])] = value
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__, self.name)
+
+    def get_quality_name(self):
+        return QUALITY.get(self.quality, 'Unknown')
+
+    def get_icon_url(self, size='large'):
+        return make_icon_url(self._region, self.icon, size)
