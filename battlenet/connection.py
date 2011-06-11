@@ -40,8 +40,8 @@ class Connection(object):
     def __init__(self, public_key=None, private_key=None,
                  game='wow', eventlet=None):
 
-        self.public_key = public_key or __class__.defaults.get('public_key')
-        self.private_key = private_key or __class__.defaults.get('private_key')
+        self.public_key = public_key or Connection.defaults.get('public_key')
+        self.private_key = private_key or Connection.defaults.get('private_key')
         self.game = game
         self.eventlet = eventlet or Connection.defaults.get('eventlet', False)
 

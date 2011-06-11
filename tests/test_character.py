@@ -15,8 +15,6 @@ class CharacterTest(unittest.TestCase):
     def test_general(self):
         character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy')
 
-        print character.guild.refresh()
-
         self.assertEqual(character.name, 'Vishnevskiy')
         self.assertEqual(str(character), 'Vishnevskiy')
 
@@ -94,6 +92,10 @@ class CharacterTest(unittest.TestCase):
 
         self.assertTrue(hasattr(character, 'pets'))
         self.assertIn('Rudebull', [pet.name for pet in character.pets])
+
+    def test_eu_character(self):
+        character = Character(battlenet.EUROPE, 'Skullcrusher', 'Rafleshia')
+        self.assertEqual(character.name, 'Rafleshia')
 
 if __name__ == '__main__':
     unittest.main()
