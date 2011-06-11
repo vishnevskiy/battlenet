@@ -6,7 +6,7 @@ import sha
 import time
 import urlparse
 from .things import Character, Realm, Guild, Reward, Perk
-from .exceptions import APIError, RealmNotFound
+from .exceptions import APIError, CharacterNotFound, GuildNotFound, RealmNotFound
 from .utils import slugify, quote
 
 try:
@@ -98,7 +98,7 @@ class Connection(object):
             else:
                 response = urllib2.urlopen(request)
         except urllib2.URLError, e:
-            raise APIError('HTTP %s' % e.code)
+            raise APIError(str(e))
 
         try:
             data = json.loads(response.read())
@@ -114,23 +114,29 @@ class Connection(object):
         name = quote(name.lower())
         realm = slugify(realm)
 
-        data = self.make_request(region, '/character/%s/%s' % (realm, name), {'fields': fields})
+        try:
+            data = self.make_request(region, '/character/%s/%s' % (realm, name), {'fields': fields})
 
-        if raw:
-            return data
+            if raw:
+                return data
 
-        return Character(region, data=data, connection=self)
+            return Character(region, data=data, connection=self)
+        except APIError:
+            raise CharacterNotFound
 
     def get_guild(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
         realm = slugify(realm)
 
-        data = self.make_request(region, '/guild/%s/%s' % (realm, name), {'fields': fields})
+        try:
+            data = self.make_request(region, '/guild/%s/%s' % (realm, name), {'fields': fields})
 
-        if raw:
-            return data
+            if raw:
+                return data
 
-        return Guild(region, data=data, connection=self)
+            return Guild(region, data=data, connection=self)
+        except APIError:
+            raise GuildNotFound
 
     def get_all_realms(self, region, raw=False):
         data = self.make_request(region, '/realm/status')
