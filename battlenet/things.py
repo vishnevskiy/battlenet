@@ -181,10 +181,10 @@ class Character(LazyThing):
                 'primary': [],
                 'secondary': []
             }
-
+            
             for type_ in professions.keys():
                 professions[type_] = [Profession(self, profession)
-                    for profession in self._data[Character.PROFESSIONS][type_]]
+                    for profession in self._data[Character.PROFESSIONS][type_ + 'Skills']]
 
             self._professions = professions
 
@@ -485,8 +485,9 @@ class Build(Thing):
         self.selected = data.get('selected', False)
         self.glyphs = {}
 
-        for type_ in ['prime', 'major', 'minor']:
-            self.glyphs[type_] = [Glyph(self, glyph) for glyph in data['glyphs'][type_]]
+        if 'glyphs' in data:
+            for type_ in ['prime', 'major', 'minor']:
+                self.glyphs[type_] = [Glyph(self, glyph) for glyph in data['glyphs'][type_]]
 
         Tree = collections.namedtuple('Tree', ('points', 'total',))
         self.trees = [Tree(**tree) for tree in data['trees']]
