@@ -28,6 +28,9 @@ def quote(name):
 
 
 def make_icon_url(region, icon, size='large'):
+    if not icon:
+        return ''
+
     if size == 'small':
         size = 18
     else:
