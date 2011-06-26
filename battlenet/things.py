@@ -483,10 +483,14 @@ class Build(Thing):
         self.icon = data['icon']
         self.name = data['name']
         self.selected = data.get('selected', False)
-        self.glyphs = {}
+        self.glyphs = {
+            'prime': [],
+            'major': [],
+            'minor': [],
+        }
 
         if 'glyphs' in data:
-            for type_ in ['prime', 'major', 'minor']:
+            for type_ in self.glyphs.keys():
                 self.glyphs[type_] = [Glyph(self, glyph) for glyph in data['glyphs'][type_]]
 
         Tree = collections.namedtuple('Tree', ('points', 'total',))
