@@ -159,6 +159,9 @@ class Character(LazyThing):
         self.achievement_points = data['achievementPoints']
         self.faction = RACE_TO_FACTION[self.race]
 
+        if Character.GUILD in self._fields and Character.GUILD not in self._data:
+            self._data[Character.GUILD] = None
+
         if 'lastModified' in data:
             self.last_modified = datetime.datetime.fromtimestamp(data['lastModified'] / 1000)
         else:
@@ -229,9 +232,13 @@ class Character(LazyThing):
     def guild(self):
         if self._refresh_if_not_present(Character.GUILD):
             data = self._data[Character.GUILD]
-            data['side'] = self.faction.lower()
 
-            self._guild = Guild(self.region, realm=self._data['realm'], data=data, connection=self.connection)
+            if data:
+                data['side'] = self.faction.lower()
+
+                self._guild = Guild(self.region, realm=self._data['realm'], data=data, connection=self.connection)
+            else:
+                self._guild = None
 
         return self._guild
 
@@ -480,7 +487,7 @@ class Build(Thing):
         self._data = data
 
         self.build = data['build']
-        self.icon = data['icon']
+        self.icon = data.get('icon')
         self.name = data['name']
         self.selected = data.get('selected', False)
         self.glyphs = {
