@@ -2,7 +2,7 @@ import logging
 import urllib2
 import base64
 import hmac
-import sha
+import hashlib
 import time
 import urlparse
 from .things import Character, Realm, Guild, Reward, Perk
@@ -60,7 +60,7 @@ class Connection(object):
 
     def sign_request(self, method, now, url, private_key):
         string_to_sign = '%s\n%s\n%s\n' % (method, now, url)
-        hash = hmac.new(private_key, string_to_sign, sha).digest()
+        hash = hmac.new(private_key, string_to_sign, hashlib.sha1).digest()
         return base64.encodestring(hash).rstrip()
 
     def make_request(self, region, path, params=None):

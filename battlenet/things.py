@@ -59,8 +59,8 @@ class LazyThing(Thing):
 
 
 class Character(LazyThing):
-    MALE = 'male'
-    FEMALE = 'female'
+    MALE = 0
+    FEMALE = 1
 
     ALLIANCE = 'Alliance'
     HORDE = 'Horde'
@@ -184,10 +184,10 @@ class Character(LazyThing):
                 'primary': [],
                 'secondary': []
             }
-            
+
             for type_ in professions.keys():
                 professions[type_] = [Profession(self, profession)
-                    for profession in self._data[Character.PROFESSIONS][type_ + 'Skills']]
+                    for profession in self._data[Character.PROFESSIONS][type_]]
 
             self._professions = professions
 
@@ -606,7 +606,10 @@ class Guild(LazyThing):
         self.level = data['level']
         self.emblem = Emblem(data['emblem']) if 'emblem' in data else None
         self.achievement_points = data['achievementPoints']
-        self.faction = data['side'].capitalize()
+        self.faction = ({
+            0: 'alliance',
+            1: 'horde',
+        }[data['side']] if isinstance(data['side'], int) else data['side']).capitalize()
 
     def refresh(self, *fields):
         for field in fields:
@@ -698,8 +701,8 @@ class Perk(Thing):
         self.id = data['spell']['id']
         self.name = data['spell']['name']
         self.description = data['spell']['description']
-        self.subtext = data['spell']['subtext']
-        self.cooldown = data['spell']['cooldown']['cooldown'] if 'cooldown' in data['spell'] else None
+        self.subtext = data['spell'].get('subtext', '')
+        self.cooldown = data['spell'].get('cooldown', '')
         self.cast_time = data['spell'].get('castTime')
         self.icon = data['spell'].get('icon')
         self.range = data['spell'].get('range')
