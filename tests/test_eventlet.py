@@ -29,7 +29,7 @@ class EventletTest(unittest.TestCase):
             return battlenet.Realm(battlenet.UNITED_STATES, name)
 
         for i, realm in enumerate(self.pool.imap(get_realm, names)):
-            self.assertEqual(realm.slug, battlenet.slugify(names[i]))
+            self.assertEqual(realm.slug, names[i])
 
 if __name__ == '__main__':
     unittest.main()

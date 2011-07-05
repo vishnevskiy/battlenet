@@ -1,19 +1,5 @@
 import unicodedata
-import re
 import urllib
-
-_slugify_strip_re = re.compile(r'[^\w\s-]')
-_slugify_hyphenate_re = re.compile(r'[-\s]+')
-
-
-def slugify(value):
-    slug = unicode(_slugify_strip_re.sub('', normalize(value)).strip().lower())
-    slug = _slugify_hyphenate_re.sub('-', slug)
-
-    if not slug:
-        return quote(value)
-
-    return quote(slug)
 
 
 def normalize(name):
