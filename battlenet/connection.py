@@ -7,7 +7,7 @@ import time
 import urlparse
 from .things import Character, Realm, Guild, Reward, Perk
 from .exceptions import APIError, CharacterNotFound, GuildNotFound, RealmNotFound
-from .utils import slugify, quote
+from .utils import quote
 
 try:
     import simplejson as json
@@ -112,7 +112,7 @@ class Connection(object):
 
     def get_character(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
-        realm = slugify(realm)
+        realm = quote(realm.lower())
 
         try:
             data = self.make_request(region, '/character/%s/%s' % (realm, name), {'fields': fields})
@@ -126,7 +126,7 @@ class Connection(object):
 
     def get_guild(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
-        realm = slugify(realm)
+        realm = quote(realm.lower())
 
         try:
             data = self.make_request(region, '/guild/%s/%s' % (realm, name), {'fields': fields})
@@ -147,7 +147,7 @@ class Connection(object):
         return [Realm(region, data=realm, connection=self) for realm in data['realms']]
 
     def get_realms(self, region, names, raw=False):
-        data = self.make_request(region, '/realm/status', {'realms': ','.join(map(slugify, names))})
+        data = self.make_request(region, '/realm/status', {'realms': ','.join(map(quote, names))})
 
         if raw:
             return data['realms']
@@ -155,7 +155,7 @@ class Connection(object):
         return [Realm(region, data=realm, connection=self) for realm in data['realms']]
 
     def get_realm(self, region, name, raw=False):
-        data = self.make_request(region, '/realm/status', {'realm': slugify(name)})
+        data = self.make_request(region, '/realm/status', {'realm': quote(name.lower())})
 
         if len(data['realms']) != 1:
             raise RealmNotFound

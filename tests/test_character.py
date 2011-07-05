@@ -94,8 +94,8 @@ class CharacterTest(unittest.TestCase):
         self.assertIn('Rudebull', [pet.name for pet in character.pets])
 
     def test_eu_character(self):
-        character = Character(battlenet.EUROPE, 'Skullcrusher', 'Rafleshia')
-        self.assertEqual(character.name, 'Rafleshia')
+        character = Character(battlenet.EUROPE, 'свежеватель-душ', 'Поникс')
+        self.assertEqual(character.name, 'Поникс')
 
 if __name__ == '__main__':
     unittest.main()
