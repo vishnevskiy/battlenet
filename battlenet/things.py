@@ -476,7 +476,7 @@ class Equipment(Thing):
         self._data = data
 
         self.average_item_level = data['averageItemLevel']
-        self.average_item_level_equiped = data['averageItemLevelEquipped']
+        self.average_item_level_equipped = data['averageItemLevelEquipped']
 
         self.main_hand = Item(self._character.region, data['mainHand']) if data.get('mainHand') else None
         self.off_hand = Item(self._character.region, data['offHand']) if data.get('offHand') else None
@@ -561,9 +561,9 @@ class Glyph(Thing):
 
 class Instance(Thing):
     def __init__(self, character, data, type_):
-        self._character = character;
-        self._data = data;
-        self._type = type_;
+        self._character = character
+        self._data = data
+        self._type = type_
 
         self.name = data['name']
         self.normal = data['normal']
@@ -571,6 +571,14 @@ class Instance(Thing):
         self.id = data['id']
 
         self.bosses = [Boss(self, boss) for boss in data['bosses']]
+
+    def is_complete(self, type_):
+        assert type_ in ['normal', 'heroic']
+        return self._data[type_] == 2
+
+    def is_started(self, type_):
+        assert type_ in ['normal', 'heroic']
+        return self._data[type_] == 1
 
     def __str__(self):
         return self.name
