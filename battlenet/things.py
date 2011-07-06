@@ -119,8 +119,11 @@ class Character(LazyThing):
     GUILD = 'guild'
     QUESTS = 'quests'
     PETS = 'pets'
+    PROGRESSION = 'progression'
+    ACHIEVEMENTS = 'achievements'
     ALL_FIELDS = [STATS, TALENTS, ITEMS, REPUTATIONS, TITLES, PROFESSIONS,
-                  APPEARANCE, COMPANIONS, MOUNTS, GUILD, QUESTS, PETS]
+                  APPEARANCE, COMPANIONS, MOUNTS, GUILD, QUESTS, PETS,
+                  PROGRESSION, ACHIEVEMENTS]
 
     def __init__(self, region, realm=None, name=None, data=None, fields=None, connection=None):
         self.region = region
@@ -194,6 +197,16 @@ class Character(LazyThing):
         return self._professions
 
     @property
+    def progression(self):
+        if self._refresh_if_not_present(Character.PROGRESSION):
+            instances = { 'raids': [] }
+            for type_ in instances.keys():
+                instances[type_] = [Instance(self, instance, type_) for instance in self._data[Character.PROGRESSION][type_]]
+            self._progression = instances
+
+        return self._progression
+
+    @property
     def equipment(self):
         if self._refresh_if_not_present(Character.ITEMS):
             self._items = Equipment(self, self._data[Character.ITEMS])
@@ -262,6 +275,19 @@ class Character(LazyThing):
             self._stats = Stats(self, self._data[Character.STATS])
 
         return self._stats
+
+    @property
+    def achievements(self):
+        if self._refresh_if_not_present(Character.ACHIEVEMENTS):
+            self._achievements = {}
+
+            achievements_completed = self._data['achievements']['achievementsCompleted']
+            achievements_completed_ts = self._data['achievements']['achievementsCompletedTimestamp']
+
+            for id_, timestamp in zip(achievements_completed, achievements_completed_ts):
+                self._achievements[id_] = datetime.datetime.fromtimestamp(timestamp / 1000)
+
+        return self._achievements
 
     def refresh(self, *fields):
         for field in fields:
@@ -532,6 +558,40 @@ class Glyph(Thing):
     def get_icon_url(self, size='large'):
         return make_icon_url(self._character.region, self.icon, size)
 
+class Instance(Thing):
+    def __init__(self, character, data, type_):
+        self._character = character;
+        self._data = data;
+        self._type = type_;
+
+        self.name = data['name']
+        self.normal = data['normal']
+        self.heroic = data['heroic']
+        self.id = data['id']
+
+        self.bosses = [Boss(self, boss) for boss in data['bosses']]
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__, self.name)
+
+class Boss(Thing):
+    def __init__(self, instance, data):
+        self._instance = instance
+        self._data = data
+
+        self.id = data['id']
+        self.name = data['name']
+        self.normal = data['normalKills']
+        self.heroic = data['heroicKills']
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__, self.name)
 
 class Profession(Thing):
     def __init__(self, character, data):
