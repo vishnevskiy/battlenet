@@ -107,7 +107,7 @@ class CharacterTest(unittest.TestCase):
                 self.assertTrue(instance.is_complete('normal'))
 
                 for boss in instance.bosses:
-                    if boss.name == 'Nefarion':
+                    if boss.name == 'Nefarian':
                         self.assertGreater(boss.normal, 0)
 
     def test_eu_character(self):
