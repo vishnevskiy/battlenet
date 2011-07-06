@@ -202,3 +202,7 @@ class Connection(object):
     def get_character_races(self, region):
         data = self.make_request(region, '/data/character/races')
         return data['races']
+
+    def get_item(self, region, item_id):
+        data = self.make_request(region, '/data/item/%d' % item_id)
+        return data

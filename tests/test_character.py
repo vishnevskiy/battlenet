@@ -3,6 +3,7 @@
 import unittest
 import os
 import battlenet
+import datetime
 from battlenet import Character
 
 PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY')
@@ -92,6 +93,22 @@ class CharacterTest(unittest.TestCase):
 
         self.assertTrue(hasattr(character, 'pets'))
         self.assertIn('Rudebull', [pet.name for pet in character.pets])
+
+    def test_achievements(self):
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.ACHIEVEMENTS])
+
+        self.assertEqual(character.achievements[513], datetime.datetime(2011, 1, 25, 12, 22, 8))
+
+    def test_progression(self):
+        character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.PROGRESSION])
+
+        for instance in character.progression['raids']:
+            if instance.name == 'Blackwing Descent':
+                self.assertTrue(instance.is_complete('normal'))
+
+                for boss in instance.bosses:
+                    if boss.name == 'Nefarion':
+                        self.assertGreater(boss.normal, 0)
 
     def test_eu_character(self):
         character = Character(battlenet.EUROPE, 'свежеватель-душ', 'Поникс')

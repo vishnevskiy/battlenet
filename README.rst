@@ -98,7 +98,7 @@ Fetching a guild
     guild = connection.get_guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence')
 
     print guild.name
-    # => Vishnevskiy
+    # => Excellence
 
     leader = guild.get_leader()
     print leader.name
