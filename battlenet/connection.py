@@ -5,7 +5,7 @@ import hmac
 import hashlib
 import time
 import urlparse
-from .things import Character, Realm, Guild, Reward, Perk
+from .things import Character, Realm, Guild, Reward, Perk, Class, Race
 from .exceptions import APIError, CharacterNotFound, GuildNotFound, RealmNotFound
 from .utils import quote
 
@@ -45,6 +45,8 @@ class Connection(object):
         self.game = game
         self.eventlet = eventlet or Connection.defaults.get('eventlet', False)
 
+        self._cache = {}
+
     def __eq__(self, other):
         if not isinstance(other, Connection):
             return False
@@ -63,7 +65,7 @@ class Connection(object):
         hash = hmac.new(private_key, string_to_sign, hashlib.sha1).digest()
         return base64.encodestring(hash).rstrip()
 
-    def make_request(self, region, path, params=None):
+    def make_request(self, region, path, params=None, cache=False):
         params = params or {}
 
         now = time.gmtime()
@@ -82,6 +84,9 @@ class Connection(object):
                 (k, ','.join(v) if isinstance(v, (set, list)) else v))
                 for k, v in params.items() if v)
         }
+
+        if cache and url in self._cache:
+            return self._cache[url]
 
         uri = urlparse.urlparse(url)
 
@@ -107,6 +112,9 @@ class Connection(object):
         else:
             if data.get('status') == 'nok':
                 raise APIError(data['reason'])
+
+        if cache:
+            self._cache[url] = data
 
         return data
 
@@ -166,14 +174,8 @@ class Connection(object):
         return Realm(self, region, data=data['realms'][0], connection=self)
 
     def get_guild_perks(self, region, raw=False):
-        name = '__%s_guild_perks' % region
-
-        if not hasattr(self, name):
-            data = self.make_request(region, '/data/guild/perks')
-            setattr(self, name, data['perks'])
-            perks = data['perks']
-        else:
-            perks = getattr(self, name)
+        data = self.make_request(region, '/data/guild/perks', cache=True)
+        perks = data['perks']
 
         if raw:
             return perks
@@ -181,28 +183,32 @@ class Connection(object):
         return [Perk(region, perk) for perk in perks]
 
     def get_guild_rewards(self, region, raw=False):
-        name = '__%s_guild_rewards' % region
-
-        if not hasattr(self, name):
-            data = self.make_request(region, '/data/guild/rewards')
-            setattr(self, name, data['rewards'])
-            rewards = data['rewards']
-        else:
-            rewards = getattr(self, name)
+        data = self.make_request(region, '/data/guild/rewards', cache=True)
+        rewards = data['rewards']
 
         if raw:
             return rewards
 
         return [Reward(region, reward) for reward in rewards]
 
-    def get_character_classes(self, region):
-        data = self.make_request(region, '/data/character/classes')
-        return data['classes']
+    def get_character_classes(self, region, raw=False):
+        data = self.make_request(region, '/data/character/classes', cache=True)
+        classes = data['classes']
 
-    def get_character_races(self, region):
-        data = self.make_request(region, '/data/character/races')
-        return data['races']
+        if raw:
+            return classes
 
-    def get_item(self, region, item_id):
+        return [Class(class_) for class_ in classes]
+
+    def get_character_races(self, region, raw=False):
+        data = self.make_request(region, '/data/character/races', cache=True)
+        races = data['races']
+
+        if raw:
+            return races
+
+        return [Race(race) for race in races]
+
+    def get_item(self, region, item_id, raw=False):
         data = self.make_request(region, '/data/item/%d' % item_id)
         return data

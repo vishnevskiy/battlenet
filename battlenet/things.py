@@ -478,27 +478,27 @@ class Equipment(Thing):
         self.average_item_level = data['averageItemLevel']
         self.average_item_level_equipped = data['averageItemLevelEquipped']
 
-        self.main_hand = Item(self._character.region, data['mainHand']) if data.get('mainHand') else None
-        self.off_hand = Item(self._character.region, data['offHand']) if data.get('offHand') else None
-        self.ranged = Item(self._character.region, data['ranged']) if data.get('ranged') else None
+        self.main_hand = EquippedItem(self._character.region, data['mainHand']) if data.get('mainHand') else None
+        self.off_hand = EquippedItem(self._character.region, data['offHand']) if data.get('offHand') else None
+        self.ranged = EquippedItem(self._character.region, data['ranged']) if data.get('ranged') else None
 
-        self.head = Item(self._character.region, data['head']) if data.get('head') else None
-        self.neck = Item(self._character.region, data['neck']) if data.get('neck') else None
-        self.shoulder = Item(self._character.region, data['shoulder']) if data.get('shoulder') else None
-        self.back = Item(self._character.region, data['back']) if data.get('back') else None
-        self.chest = Item(self._character.region, data['chest']) if data.get('chest') else None
-        self.shirt = Item(self._character.region, data['shirt']) if data.get('shirt') else None
-        self.tabard = Item(self._character.region, data['tabard']) if data.get('tabard') else None
-        self.wrist = Item(self._character.region, data['wrist']) if data.get('wrist') else None
+        self.head = EquippedItem(self._character.region, data['head']) if data.get('head') else None
+        self.neck = EquippedItem(self._character.region, data['neck']) if data.get('neck') else None
+        self.shoulder = EquippedItem(self._character.region, data['shoulder']) if data.get('shoulder') else None
+        self.back = EquippedItem(self._character.region, data['back']) if data.get('back') else None
+        self.chest = EquippedItem(self._character.region, data['chest']) if data.get('chest') else None
+        self.shirt = EquippedItem(self._character.region, data['shirt']) if data.get('shirt') else None
+        self.tabard = EquippedItem(self._character.region, data['tabard']) if data.get('tabard') else None
+        self.wrist = EquippedItem(self._character.region, data['wrist']) if data.get('wrist') else None
 
-        self.hands = Item(self._character.region, data['hands']) if data.get('hands') else None
-        self.waist = Item(self._character.region, data['waist']) if data.get('waist') else None
-        self.legs = Item(self._character.region, data['legs']) if data.get('legs') else None
-        self.feet = Item(self._character.region, data['feet']) if data.get('feet') else None
-        self.finger1 = Item(self._character.region, data['finger1']) if data.get('finger1') else None
-        self.finger2 = Item(self._character.region, data['finger2']) if data.get('finger2') else None
-        self.trinket1 = Item(self._character.region, data['trinket1']) if data.get('trinket1') else None
-        self.trinket2 = Item(self._character.region, data['trinket2']) if data.get('trinket2') else None
+        self.hands = EquippedItem(self._character.region, data['hands']) if data.get('hands') else None
+        self.waist = EquippedItem(self._character.region, data['waist']) if data.get('waist') else None
+        self.legs = EquippedItem(self._character.region, data['legs']) if data.get('legs') else None
+        self.feet = EquippedItem(self._character.region, data['feet']) if data.get('feet') else None
+        self.finger1 = EquippedItem(self._character.region, data['finger1']) if data.get('finger1') else None
+        self.finger2 = EquippedItem(self._character.region, data['finger2']) if data.get('finger2') else None
+        self.trinket1 = EquippedItem(self._character.region, data['trinket1']) if data.get('trinket1') else None
+        self.trinket2 = EquippedItem(self._character.region, data['trinket2']) if data.get('trinket2') else None
 
     def __getitem__(self, item):
         try:
@@ -803,7 +803,7 @@ class Reward(Thing):
         self.min_guild_reputation = data['minGuildRepLevel']
         self.races = data.get('races', [])
         self.achievement = data.get('achievement')
-        self.item = Item(region, data['item'])
+        self.item = EquippedItem(region, data['item'])
 
     def __str__(self):
         return self.item.name
@@ -863,7 +863,7 @@ class Realm(Thing):
         return not self.status
 
 
-class Item(Thing):
+class EquippedItem(Thing):
     def __init__(self, region, data):
         self._region = region
         self._data = data
@@ -895,3 +895,34 @@ class Item(Thing):
 
     def get_icon_url(self, size='large'):
         return make_icon_url(self._region, self.icon, size)
+
+
+class Class(Thing):
+    def __init__(self, data):
+        self._data = data
+
+        self.id = data['id']
+        self.mask = data['mask']
+        self.name = data['name']
+        self.power_type = data['powerType']
+        
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__, self.name)
+
+class Race(Thing):
+    def __init__(self, data):
+        self._data = data
+
+        self.id = data['id']
+        self.mask = data['mask']
+        self.name = data['name']
+        self.side = data['side']
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__, self.name)
