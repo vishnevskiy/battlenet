@@ -21,7 +21,7 @@ except ImportError:
 
 __all__ = ['Connection']
 
-URL_FORMAT = 'http://%(region)s.battle.net/api/%(game)s%(path)s?%(params)s'
+URL_FORMAT = 'https://%(region)s.battle.net/api/%(game)s%(path)s?%(params)s'
 
 logger = logging.getLogger('battlenet')
 
