@@ -101,12 +101,12 @@ class Connection(object):
         if self.eventlet and eventlet_urllib2:
             try:
                 response = eventlet_urllib2.urlopen(request)
-            except eventlet_urllib2.URLError as e:
+            except (eventlet_urllib2.URLError), e:
                 raise APIError(str(e))
         else:
             try:
                 response = urllib2.urlopen(request)
-            except urllib2.URLError as e:
+            except (urllib2.URLError), e:
                 raise APIError(str(e))
 
         try:
