@@ -96,15 +96,18 @@ class Connection(object):
 
         logger.debug('Battle.net => ' + url)
 
-        try:
-            request = urllib2.Request(url, None, headers)
-            if self.eventlet and eventlet_urllib2:
-                print url
+        request = urllib2.Request(url, None, headers)
+
+        if self.eventlet and eventlet_urllib2:
+            try:
                 response = eventlet_urllib2.urlopen(request)
-            else:
+            except eventlet_urllib2.URLError as e:
+                raise APIError(str(e))
+        else:
+            try:
                 response = urllib2.urlopen(request)
-        except urllib2.URLError as e:
-            raise APIError(str(e))
+            except urllib2.URLError as e:
+                raise APIError(str(e))
 
         try:
             data = json.loads(response.read())
