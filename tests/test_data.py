@@ -1,6 +1,7 @@
 import unittest
 import os
 import battlenet
+from operator import itemgetter
 
 PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY')
 PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')
@@ -37,7 +38,7 @@ class DataTest(unittest.TestCase):
         classes = self.connection.get_character_classes(
             battlenet.UNITED_STATES, raw=True)
 
-        self.assertEqual(classes, [
+        classes_ = [
                 {'powerType': 'focus', 'mask': 4, 'id': 3, 'name': 'Hunter'},
                 {'powerType': 'rage', 'mask': 1, 'id': 1, 'name': 'Warrior'},
                 {'powerType': 'mana', 'mask': 16, 'id': 5, 'name': 'Priest'},
@@ -48,7 +49,12 @@ class DataTest(unittest.TestCase):
                 {'powerType': 'runic-power', 'mask': 32, 'id': 6, 'name': 'Death Knight'},
                 {'powerType': 'mana', 'mask': 1024, 'id': 11, 'name': 'Druid'},
                 {'powerType': 'mana', 'mask': 128, 'id': 8, 'name': 'Mage'}
-        ])
+        ]
+
+        classes_.sort(key=itemgetter('id'))
+        classes.sort(key=itemgetter('id'))
+
+        self.assertEqual(classes, classes_)
 
         classes = self.connection.get_character_classes(battlenet.UNITED_STATES)
 

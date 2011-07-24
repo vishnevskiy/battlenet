@@ -99,10 +99,11 @@ class Connection(object):
         try:
             request = urllib2.Request(url, None, headers)
             if self.eventlet and eventlet_urllib2:
+                print url
                 response = eventlet_urllib2.urlopen(request)
             else:
                 response = urllib2.urlopen(request)
-        except urllib2.URLError, e:
+        except urllib2.URLError as e:
             raise APIError(str(e))
 
         try:

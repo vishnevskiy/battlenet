@@ -62,8 +62,8 @@ class CharacterTest(unittest.TestCase):
 
         secondary = character.professions['secondary']
 
-        first_aid = secondary[1]
-        archaeology = secondary[0]
+        first_aid = secondary[0]
+        archaeology = secondary[1]
 
         self.assertEqual(first_aid.name, Character.FIRST_AID)
         self.assertEqual(archaeology.name, Character.ARCHAEOLOGY)
@@ -111,8 +111,8 @@ class CharacterTest(unittest.TestCase):
                         self.assertGreater(boss.normal, 0)
 
     def test_eu_character(self):
-        character = Character(battlenet.EUROPE, 'свежеватель-душ', 'Поникс')
-        self.assertEqual(character.name, 'Поникс')
+        character = Character(battlenet.EUROPE, 'Свежеватель Душ', 'Покерадуга')
+        self.assertEqual(character.name, 'Покерадуга')
 
 if __name__ == '__main__':
     unittest.main()
