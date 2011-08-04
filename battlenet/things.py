@@ -69,7 +69,7 @@ class Character(LazyThing):
     DWARF = 'Dwarf'
     GNOME = 'Gnome'
     HUMAN = 'Human'
-    NIGHT_ELF = 'Nihgt Elf'
+    NIGHT_ELF = 'Night Elf'
     WORGEN = 'Worgen'
 
     BLOOD_ELF = 'Blood Elf'

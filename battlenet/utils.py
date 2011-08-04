@@ -4,7 +4,7 @@ import urllib
 
 def normalize(name):
     if not isinstance(name, unicode):
-        name = name.decode('utf8')
+        name = name.encode('utf8')
 
     return unicodedata.normalize('NFKC', name).encode('utf8')
 
