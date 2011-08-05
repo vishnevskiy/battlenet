@@ -509,12 +509,14 @@ class Equipment(Thing):
 
 class Build(Thing):
     def __init__(self, character, data):
+        NONE = 'None'
+        NOICON = 'inv_misc_questionmark' # The infamous macro 'question mark' icon, because Blizzard uses it in this situation.
         self._character = character
         self._data = data
 
         self.build = data['build']
-        self.icon = data.get('icon')
-        self.name = data['name']
+        self.icon = data.get('icon') if self.build.strip('0') else NOICON
+        self.name = data['name'] if self.build.strip('0') else NONE
         self.selected = data.get('selected', False)
         self.glyphs = {
             'prime': [],
@@ -530,7 +532,7 @@ class Build(Thing):
         self.trees = [Tree(**tree) for tree in data['trees']]
 
     def __str__(self):
-        return self.name + ' (%d/%d/%d' % tuple(map(operator.attrgetter('total'), self.trees))
+        return self.name + ' (%d/%d/%d)' % tuple(map(operator.attrgetter('total'), self.trees))
 
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, str(self))
