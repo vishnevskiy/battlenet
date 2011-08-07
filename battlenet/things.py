@@ -334,6 +334,7 @@ class Title(Thing):
 
         self.id = data['id']
         self.format = data['name']
+        self.selected = data.get('selected', False)
 
     def __str__(self):
         return self.format % self._character.name

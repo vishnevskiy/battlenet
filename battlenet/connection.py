@@ -214,5 +214,5 @@ class Connection(object):
         return [Race(race) for race in races]
 
     def get_item(self, region, item_id, raw=False):
-        data = self.make_request(region, '/data/item/%d' % item_id)
+        data = self.make_request(region, '/item/%d' % item_id)
         return data
