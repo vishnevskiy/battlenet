@@ -1,26 +1,18 @@
-import sys
-if sys.version_info < (2, 7):
-    import unittest2 as unittest
-else:
-    import unittest as unittest
-try:
-    ## If we can import eventlet go ahead and set up the connection to use eventlet.
-    ## Otherwise, don't set up the connection as we're not going to do this test.
-    import eventlet
-    battlenet.Connection.setup(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY, eventlet=True)
-except:
-    pass
 import os
 import battlenet
+
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest as unittest
 
 PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY')
 PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')
 
-
+battlenet.Connection.setup(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY, eventlet=True)
 
 class EventletTest(unittest.TestCase):
     try:
-        ## If we could load eventlet then go ahead and run the tests, otherwise just skip them.
         import eventlet
 
         def setUp(self):
@@ -43,7 +35,7 @@ class EventletTest(unittest.TestCase):
 
             for i, realm in enumerate(self.pool.imap(get_realm, names)):
                 self.assertEqual(realm.slug, names[i])
-    except:
+    except ImportError:
         pass
 
 if __name__ == '__main__':

@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import sys
-if sys.version_info < (2, 7):
-    import unittest2 as unittest
-else:
-    import unittest as unittest
 import battlenet
 from battlenet import Realm
 
-
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest as unittest
+    
 class RealmTest(unittest.TestCase):
     def setUp(self):
         self.connection = battlenet.Connection()

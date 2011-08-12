@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import sys
-if sys.version_info < (2, 7):
-    import unittest2 as unittest
-else:
-    import unittest as unittest
 import os
 import battlenet
 import datetime
 from battlenet import Character
+
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest as unittest
 
 PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY')
 PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')
@@ -29,7 +29,7 @@ class CharacterTest(unittest.TestCase):
 
         self.assertEqual(character.faction, Character.HORDE)
 
-        self.assertEqual(character.get_race_name(), Character.GOBLIN)
+        self.assertEqual(character.get_race_name(), Character.BLOOD_ELF)
 
         self.assertEqual(character.get_class_name(), Character.WARLOCK)
 
@@ -75,12 +75,12 @@ class CharacterTest(unittest.TestCase):
     def test_appearance(self):
         character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy', fields=[Character.APPEARANCE])
 
-        self.assertEqual(character.appearance.face, 2)
+        self.assertEqual(character.appearance.face, 0)
         self.assertEqual(character.appearance.feature, 9)
-        self.assertEqual(character.appearance.hair_color, 3)
-        self.assertEqual(character.appearance.show_cloak, True)
-        self.assertEqual(character.appearance.show_helm, True)
-        self.assertEqual(character.appearance.hair, 5)
+        self.assertEqual(character.appearance.hair_color, 4)
+        self.assertEqual(character.appearance.show_cloak, False)
+        self.assertEqual(character.appearance.show_helm, False)
+        self.assertEqual(character.appearance.hair, 3)
 
     def test_lazyload(self):
         character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Vishnevskiy')
