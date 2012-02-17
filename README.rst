@@ -61,7 +61,7 @@ Fetching all realms
 
 ::
 
-    for realm in connection.get_all_realms():
+    for realm in connection.get_all_realms(battlenet.UNITED_STATES):
         print realm
 
 Fetching a character
