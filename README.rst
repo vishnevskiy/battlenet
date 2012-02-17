@@ -89,7 +89,7 @@ Fetching a guild
 
 ::
 
-    from battlenet import Character
+    from battlenet import Guild
 
     # If a global connection was setup
     guild = Guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence')
