@@ -140,7 +140,7 @@ class Character(LazyThing):
         return self.name
 
     def __repr__(self):
-        return '<%s: %s@%s>' % (self.__class__.__name__, self.name, self._data['realm'])
+        return '<%s: %s@%s>' % (self.__class__.__name__, self.name, normalize(self._data['realm']))
 
     def __eq__(self, other):
         if not isinstance(other, Character):
