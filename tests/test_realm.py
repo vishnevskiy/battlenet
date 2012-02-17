@@ -30,6 +30,21 @@ class RealmTest(unittest.TestCase):
 
         self.assertGreater(len(realms), 0)
 
+    def test_all_realms_europe(self):
+        realms = self.connection.get_all_realms(battlenet.EUROPE)
+
+        self.assertGreater(len(realms), 0)
+
+    def test_all_realms_korea(self):
+        realms = self.connection.get_all_realms(battlenet.KOREA)
+
+        self.assertGreater(len(realms), 0)
+
+    def test_all_realms_taiwan(self):
+        realms = self.connection.get_all_realms(battlenet.TAIWAN)
+
+        self.assertGreater(len(realms), 0)
+
     def test_realms(self):
         names = sorted(['Blackrock', 'Nazjatar'])
 
