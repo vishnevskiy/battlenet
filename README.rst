@@ -14,6 +14,8 @@ Major features
 
 * Eventlet support
 
+* Support locales (en, fr, de, ...)
+
 Making a connection
 ----------------------
 
@@ -23,7 +25,7 @@ Global connection settings can be setup so that objects can make connections imp
 
     from battlenet import Connection
 
-    Connection.setup(public_key='your public key', private_key='your private key')
+    Connection.setup(public_key='your public key', private_key='your private key', locale='fr')
 
 You can also create connections explicitly.
 
@@ -31,7 +33,7 @@ You can also create connections explicitly.
 
     from battlenet import Connection
 
-    connection = Connection(public_key='your public key', private_key='your private key')
+    connection = Connection(public_key='your public key', private_key='your private key', locale='fr')
 
 Fetching a specific realm
 -------------------------

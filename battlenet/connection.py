@@ -21,7 +21,7 @@ except ImportError:
 
 __all__ = ['Connection']
 
-URL_FORMAT = 'https://%(region)s.battle.net/api/%(game)s%(path)s?%(params)s'
+URL_FORMAT = 'https://%(region)s.battle.net/api/%(game)s%(path)s?locale=%(locale)s&%(params)s'
 
 logger = logging.getLogger('battlenet')
 
@@ -34,16 +34,18 @@ class Connection(object):
     defaults = {
         'eventlet': False,
         'public_key': None,
-        'private_key': None
+        'private_key': None,
+        'locale': 'en'
     }
 
     def __init__(self, public_key=None, private_key=None,
-                 game='wow', eventlet=None):
+                 game='wow', eventlet=None, locale=None):
 
         self.public_key = public_key or Connection.defaults.get('public_key')
         self.private_key = private_key or Connection.defaults.get('private_key')
         self.game = game
         self.eventlet = eventlet or Connection.defaults.get('eventlet', False)
+        self.locale = locale or Connection.defaults.get('locale')
 
         self._cache = {}
 
@@ -80,6 +82,7 @@ class Connection(object):
             'region': region,
             'game': self.game,
             'path': path,
+            'locale': self.locale,
             'params': '&'.join('='.join(
                 (k, ','.join(v) if isinstance(v, (set, list)) else v))
                 for k, v in params.items() if v)
