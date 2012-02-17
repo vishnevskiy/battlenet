@@ -111,11 +111,13 @@ class CharacterTest(unittest.TestCase):
     def test_lazyload(self):
         character = Character(self._region, self._realm_name, self._character_name)
 
+        self.assertIsInstance(repr(character), str)
         self.assertEqual(character.guild.realm.name, self._realm_name)
 
     def test_unicode(self):
         character = Character(self._region, self._realm_name, self._character_name_unicode)
 
+        self.assertIsInstance(repr(character), str)
         self.assertEqual(character.name, self._character_name_unicode)
 
     def test_pet_class(self):

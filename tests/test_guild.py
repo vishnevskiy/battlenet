@@ -42,6 +42,8 @@ class GuildTest(unittest.TestCase):
     def test_lazyload_member_character(self):
         guild = Guild(self._guild_region, self._guild_realm_name, self._guild_name)
 
+        self.assertIsInstance(repr(guild), str)
+
         character = guild.get_leader()
 
         self.assertRegexpMatches(character.get_full_class_name(), r'^Feral Combat Druid$')
