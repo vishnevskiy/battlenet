@@ -6,6 +6,10 @@ from battlenet import Realm
 
 
 class RealmTest(unittest.TestCase):
+    def _realm_for(self, region, name):
+        realm = self.connection.get_realm(region, name)
+        self.assertEqual(realm.name, name)
+
     def setUp(self):
         self.connection = battlenet.Connection()
 
@@ -62,10 +66,20 @@ class RealmTest(unittest.TestCase):
 
         self.assertIn(realm.population, [Realm.LOW, Realm.MEDIUM, Realm.HIGH])
 
-    def test_unicode(self):
-        realm = self.connection.get_realm(battlenet.EUROPE, 'Термоштепсель')
+    def test_realm_united_state(self):
+        self._realm_for(battlenet.UNITED_STATES, 'Blackrock')
 
-        self.assertEqual(realm.name, 'Термоштепсель')
+    def test_realm_europe(self):
+        self._realm_for(battlenet.EUROPE, 'Khaz Modan')
+
+    def test_realm_korea(self):
+        self._realm_for(battlenet.KOREA, '가로나')
+
+    def test_realm_taiwan(self):
+        self._realm_for(battlenet.TAIWAN, '世界之樹')
+
+    def test_unicode(self):
+        self._realm_for(battlenet.TAIWAN, '世界之樹')
 
     def tearDown(self):
         del self.connection
