@@ -17,6 +17,13 @@ class GuildTest(unittest.TestCase):
     _guild_realm_name = "Lightning's Blade"
     _guild_name = 'DREAM Paragon'
 
+    _guilds = (
+        (battlenet.UNITED_STATES, 'illidan', 'Blood Legion'),
+        (battlenet.EUROPE, "Lightning's Blade", 'DREAM Paragon'),
+        (battlenet.KOREA, '카르가스', '즐거운공격대'),
+        (battlenet.TAIWAN, '水晶之刺', 'Stars'),
+    )
+
     def test_general(self):
         guild = Guild(self._guild_region, self._guild_realm_name, self._guild_name)
 
@@ -64,6 +71,12 @@ class GuildTest(unittest.TestCase):
         guild = Guild(self._guild_region, self._guild_realm_name, self._guild_name)
 
         self.assertGreater(len(guild.rewards), 1)
+
+    def test_guilds_worldwide(self):
+        for region, realm, guild_name in self._guilds:
+            guild = Guild(region, realm, guild_name)
+            self.assertIsInstance(repr(guild), str)
+            self.assertEqual(guild.name, guild_name)
 
 if __name__ == '__main__':
     unittest.main()
