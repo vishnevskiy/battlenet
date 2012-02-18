@@ -50,10 +50,10 @@ RACE_TO_FACTION = {
 }
 
 EXPANSION = {
-    'wow': 'World of Warcraft',
-    'bc': 'The Burning Crusade',
-    'lk': 'Wrath of the Lich King',
-    'cata': 'Cataclysm',
+    0: ('wow', 'World of Warcraft'),
+    1: ('bc', 'The Burning Crusade'),
+    2: ('lk', 'Wrath of the Lich King'),
+    3: ('cata', 'Cataclysm'),
 }
 
 RAIDS = {

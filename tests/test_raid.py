@@ -22,9 +22,16 @@ class RaidTest(unittest.TestCase):
     def test_ids(self):
         character = Character(self._region, self._realm_name, self._character_name)
         for raid in character.progression['raids']:
-            expansion_short, expansion_long = Raid(raid.id).expansion(), raid.name
+            expansion_short, expansion_long = Raid(raid.id).expansion()
             self.assertIsNotNone(expansion_short)
             self.assertIsNotNone(expansion_long)
+
+    def test_order(self):
+        expansions = ('wow', 'bc', 'lk', 'cata')
+        keys = battlenet.EXPANSION.keys()
+        keys.sort()
+        for i in range(len(keys)):
+            self.assertEqual(battlenet.EXPANSION[i][0], expansions[i])
 
 if __name__ == '__main__':
     unittest.main()

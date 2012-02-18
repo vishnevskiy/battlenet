@@ -931,5 +931,7 @@ class Raid(Thing):
     def expansion(self):
         for exp, ids in RAIDS.items():
             if self.id in ids:
-                return exp, EXPANSION[exp]
+                for e in EXPANSION.keys():
+                    if EXPANSION[e][0] == exp:
+                        return exp, EXPANSION[e][1]
         return (None, None)
