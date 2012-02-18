@@ -1,7 +1,7 @@
 import operator
 import collections
 import datetime
-from .enums import RACE, CLASS, QUALITY, RACE_TO_FACTION
+from .enums import RACE, CLASS, QUALITY, RACE_TO_FACTION, RAIDS, EXPANSION
 from .utils import make_icon_url, normalize, make_connection
 
 try:
@@ -9,7 +9,7 @@ try:
 except ImportError:
     import json
 
-__all__ = ['Character', 'Guild', 'Realm']
+__all__ = ['Character', 'Guild', 'Realm', 'Raid']
 
 
 class Thing(object):
@@ -923,3 +923,13 @@ class Race(Thing):
 
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.name)
+
+class Raid(Thing):
+    def __init__(self, id):
+        self.id = id
+
+    def expansion(self):
+        for exp, ids in RAIDS.items():
+            if self.id in ids:
+                return exp, EXPANSION[exp]
+        return (None, None)
