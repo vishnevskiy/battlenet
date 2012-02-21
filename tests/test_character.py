@@ -42,6 +42,7 @@ class CharacterTest(unittest.TestCase):
         (battlenet.EUROPE, "Lightning's Blade", 'Sejta'),
         (battlenet.KOREA, '카르가스', '박휘박멸'),
         (battlenet.TAIWAN, '水晶之刺', '憂郁的風'),
+        (battlenet.CHINA, '灰谷', '小蠬蝦'),
     )
 
     def test_general(self):

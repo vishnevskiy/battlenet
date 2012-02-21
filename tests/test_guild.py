@@ -22,6 +22,7 @@ class GuildTest(unittest.TestCase):
         (battlenet.EUROPE, "Lightning's Blade", 'DREAM Paragon'),
         (battlenet.KOREA, '카르가스', '즐거운공격대'),
         (battlenet.TAIWAN, '水晶之刺', 'Stars'),
+        (battlenet.CHINA, '灰谷', '星之轨迹'),
     )
 
     def test_general(self):

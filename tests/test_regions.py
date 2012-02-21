@@ -26,6 +26,10 @@ class RegionsTest(unittest.TestCase):
         realms = self.connection.get_all_realms(battlenet.TAIWAN)
         self.assertTrue(len(realms) > 0)
 
+    def test_cn(self):
+        realms = self.connection.get_all_realms(battlenet.CHINA)
+        self.assertTrue(len(realms) > 0)
+
     def tearDown(self):
         del self.connection
 
