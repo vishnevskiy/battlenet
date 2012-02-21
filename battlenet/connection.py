@@ -21,9 +21,7 @@ except ImportError:
 
 __all__ = ['Connection']
 
-SERVER_NAME = '%(region)s.battle.net'
-SERVER_NAME_CN = 'www.battlenet.com.cn'
-URL_FORMAT = 'https://%(server)s/api/%(game)s%(path)s?locale=%(locale)s&%(params)s'
+URL_FORMAT = 'https://%(region)s.battle.net/api/%(game)s%(path)s?locale=%(locale)s&%(params)s'
 
 logger = logging.getLogger('battlenet')
 
@@ -80,13 +78,8 @@ class Connection(object):
             'Date': date
         }
 
-        if region == 'cn':
-            server_name = SERVER_NAME_CN
-        else:
-            server_name = SERVER_NAME % {'region': region}
-
         url = URL_FORMAT % {
-            'server': server_name,
+            'region': region,
             'game': self.game,
             'path': path,
             'locale': self.locale,
