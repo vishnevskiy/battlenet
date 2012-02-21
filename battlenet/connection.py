@@ -35,7 +35,7 @@ class Connection(object):
         'eventlet': False,
         'public_key': None,
         'private_key': None,
-        'locale': 'en'
+        'locale': ''
     }
 
     def __init__(self, public_key=None, private_key=None,
