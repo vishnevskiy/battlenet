@@ -514,7 +514,7 @@ class Build(Thing):
 
         self.build = data['build']
         self.icon = data.get('icon')
-        self.name = data['name']
+        self.name = data.get('name', '-')
         self.selected = data.get('selected', False)
         self.glyphs = {
             'prime': [],
