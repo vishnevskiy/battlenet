@@ -108,10 +108,3 @@ More Examples
 ----------------------
 
 Read the unit tests inside the tests directory.
-
-TODO
-----------------------
-
-* Better abstraction over data API
-* Documentation
-* Python 3 Support
