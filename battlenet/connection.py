@@ -7,7 +7,7 @@ import time
 import urlparse
 from .things import Character, Realm, Guild, Reward, Perk, Class, Race
 from .exceptions import APIError, CharacterNotFound, GuildNotFound, RealmNotFound
-from .utils import quote
+from .utils import quote, normalize
 
 try:
     import simplejson as json
@@ -167,14 +167,15 @@ class Connection(object):
 
     def get_realm(self, region, name, raw=False):
         data = self.make_request(region, '/realm/status', {'realm': quote(name.lower())})
+        data = [d for d in data['realms'] if normalize(d['name']) == normalize(name)]
 
-        if len(data['realms']) != 1:
+        if len(data) != 1:
             raise RealmNotFound
 
         if raw:
-            return data['realms'][0]
+            return data[0]
 
-        return Realm(self, region, data=data['realms'][0], connection=self)
+        return Realm(self, region, data=data[0], connection=self)
 
     def get_guild_perks(self, region, raw=False):
         data = self.make_request(region, '/data/guild/perks', cache=True)
