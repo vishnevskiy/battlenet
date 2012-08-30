@@ -4,6 +4,7 @@ from .constants import UNITED_STATES
 from .constants import EUROPE
 from .constants import KOREA
 from .constants import TAIWAN
+from .constants import CHINA
 
 from .enums import RACE
 from .enums import CLASS
