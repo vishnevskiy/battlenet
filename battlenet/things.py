@@ -516,7 +516,7 @@ class Build(Thing):
         self._character = character
         self._data = data
 
-        spec = data['spec']
+        spec = data.get('spec', {})
 
         self.talents = data['talents']
         self.icon = spec.get('icon', NOICON)
