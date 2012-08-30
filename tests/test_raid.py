@@ -27,7 +27,7 @@ class RaidTest(unittest.TestCase):
             self.assertIsNotNone(expansion_long)
 
     def test_order(self):
-        expansions = ('wow', 'bc', 'lk', 'cata')
+        expansions = ('wow', 'bc', 'lk', 'cata', 'mop')
         keys = battlenet.EXPANSION.keys()
         keys.sort()
         for i in range(len(keys)):
