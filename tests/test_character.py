@@ -44,7 +44,7 @@ class CharacterTest(unittest.TestCase):
     _characters = (
         (battlenet.UNITED_STATES, 'illidan', 'Zonker'),
         (battlenet.EUROPE, "Lightning's Blade", 'Sejta'),
-        (battlenet.KOREA, '카르가스', '박휘박멸'),
+        (battlenet.KOREA, '굴단', '미스호드진'),
         (battlenet.TAIWAN, '水晶之刺', '憂郁的風'),
         (battlenet.CHINA, '灰谷', '小蠬蝦'),
     )
@@ -55,9 +55,9 @@ class CharacterTest(unittest.TestCase):
         self.assertEqual(character.name, self._character_name)
         self.assertEqual(str(character), self._character_name)
 
-        self.assertEqual(character.get_realm_name(), self._realm_name)
-        self.assertEqual(character.realm.name, self._realm_name)
-        self.assertEqual(str(character.realm), self._realm_name)
+        self.assertEqual(character.get_realm_name(), self._realm_name.replace("'", ""))
+        self.assertEqual(character.realm.name, self._realm_name.replace("'", ""))
+        self.assertEqual(str(character.realm), self._realm_name.replace("'", ""))
 
         self.assertEqual(character.faction, self._faction)
 
@@ -117,7 +117,7 @@ class CharacterTest(unittest.TestCase):
         character = Character(self._region, self._realm_name, self._character_name)
 
         self.assertIsInstance(repr(character), str)
-        self.assertEqual(character.guild.realm.name, self._realm_name)
+        self.assertEqual(character.guild.realm.name, self._realm_name.replace("'", ""))
 
     def test_unicode(self):
         character = Character(self._region, self._realm_name, self._character_name_unicode)
