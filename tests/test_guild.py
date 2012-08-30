@@ -35,9 +35,9 @@ class GuildTest(unittest.TestCase):
         self.assertEqual(guild.name, self._guild_name)
         self.assertEqual(str(guild), self._guild_name)
 
-        self.assertEqual(guild.get_realm_name(), self._guild_realm_name)
-        self.assertEqual(guild.realm.name, self._guild_realm_name)
-        self.assertEqual(str(guild.realm), self._guild_realm_name)
+        self.assertEqual(guild.get_realm_name(), self._guild_realm_name.replace("'", ""))
+        self.assertEqual(guild.realm.name, self._guild_realm_name.replace("'", ""))
+        self.assertEqual(str(guild.realm), self._guild_realm_name.replace("'", ""))
 
     def test_len(self):
         guild = Guild(self._guild_region, self._guild_realm_name, self._guild_name, fields=[Guild.MEMBERS])
