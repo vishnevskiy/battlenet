@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import unittest
 import battlenet
 from battlenet import Realm
 
-
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest as unittest
+    
 class RealmTest(unittest.TestCase):
     def _realm_for(self, region, name):
         realm = self.connection.get_realm(region, name)
@@ -14,7 +17,7 @@ class RealmTest(unittest.TestCase):
         self.connection = battlenet.Connection()
 
     def test_realm_by_name(self):
-        name = "Kil'jaeden"
+        name = "Kiljaeden"
 
         realm = self.connection.get_realm(battlenet.UNITED_STATES, name)
         self.assertEqual(name, realm.name)
@@ -88,6 +91,7 @@ class RealmTest(unittest.TestCase):
 
     def test_unicode(self):
         self._realm_for(battlenet.TAIWAN, '世界之樹')
+        self.assertEqual(realm.name, 'Thermaplugg')
 
     def tearDown(self):
         del self.connection

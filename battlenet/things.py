@@ -69,7 +69,7 @@ class Character(LazyThing):
     DWARF = 'Dwarf'
     GNOME = 'Gnome'
     HUMAN = 'Human'
-    NIGHT_ELF = 'Nihgt Elf'
+    NIGHT_ELF = 'Night Elf'
     WORGEN = 'Worgen'
 
     BLOOD_ELF = 'Blood Elf'
@@ -334,6 +334,7 @@ class Title(Thing):
 
         self.id = data['id']
         self.format = data['name']
+        self.selected = data.get('selected', False)
 
     def __str__(self):
         return self.format % self._character.name
@@ -408,7 +409,8 @@ class Stats(Thing):
         self.ranged_dps = data['rangedDps']
         self.ranged_hit_rating = data['rangedHitRating']
         self.ranged_speed = data['rangedSpeed']
-        self.resilience = data['resil']
+        self.resilience = data['pvpResilience']
+        self.resilience_rating = data['pvpResilienceRating']
         self.spell_crit = data['spellCrit']
         self.spell_crit_rating = data['spellCritRating']
         self.spell_penetration = data['spellPen']
@@ -509,12 +511,16 @@ class Equipment(Thing):
 
 class Build(Thing):
     def __init__(self, character, data):
+        NONE = 'None'
+        NOICON = 'inv_misc_questionmark' # The infamous macro 'question mark' icon, because Blizzard uses it in this situation.
         self._character = character
         self._data = data
 
-        self.build = data['build']
-        self.icon = data.get('icon')
-        self.name = data.get('name', '-')
+        spec = data['spec']
+
+        self.talents = data['talents']
+        self.icon = spec.get('icon', NOICON)
+        self.name = spec.get('name', NONE)
         self.selected = data.get('selected', False)
         self.glyphs = {
             'prime': [],
@@ -522,15 +528,16 @@ class Build(Thing):
             'minor': [],
         }
 
-        if 'glyphs' in data:
-            for type_ in self.glyphs.keys():
-                self.glyphs[type_] = [Glyph(self, glyph) for glyph in data['glyphs'][type_]]
+#        if 'glyphs' in data:
+#            for type_ in self.glyphs.keys():
+#                self.glyphs[type_] = [Glyph(self, glyph) for glyph in data['glyphs'][type_]]
 
-        Tree = collections.namedtuple('Tree', ('points', 'total',))
-        self.trees = [Tree(**tree) for tree in data['trees']]
+#        Tree = collections.namedtuple('Tree', ('points', 'total',))
+#        self.trees = [Tree(**tree) for tree in data['trees']]
+        self.trees = []
 
     def __str__(self):
-        return self.name + ' (%d/%d/%d' % tuple(map(operator.attrgetter('total'), self.trees))
+        return self.name + ' (%d/%d/%d)' % tuple(map(operator.attrgetter('total'), self.trees))
 
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, str(self))
@@ -557,6 +564,7 @@ class Glyph(Thing):
 
     def get_icon_url(self, size='large'):
         return make_icon_url(self._character.region, self.icon, size)
+
 
 class Instance(Thing):
     def __init__(self, character, data, type_):
@@ -585,6 +593,7 @@ class Instance(Thing):
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.name)
 
+
 class Boss(Thing):
     def __init__(self, instance, data):
         self._instance = instance
@@ -600,6 +609,7 @@ class Boss(Thing):
 
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.name)
+
 
 class Profession(Thing):
     def __init__(self, character, data):

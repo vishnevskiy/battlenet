@@ -1,6 +1,10 @@
-import unittest
 import os
 import battlenet
+
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest as unittest
 
 PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY')
 PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')

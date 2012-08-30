@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import unittest
 import os
 import battlenet
 import datetime
 from battlenet import Guild
 
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest as unittest
+    
 PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY')
 PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')
 
