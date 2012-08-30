@@ -65,12 +65,12 @@ class RealmTest(unittest.TestCase):
         self.assertEqual(names, sorted([realm.name for realm in realms]))
 
     def test_realm_type(self):
-        realm = self.connection.get_realm(battlenet.UNITED_STATES, 'nazjatar')
+        realm = self.connection.get_realm(battlenet.UNITED_STATES, 'Nazjatar')
 
         self.assertEqual(realm.type, Realm.PVP)
 
     def test_realm_population(self):
-        realm = self.connection.get_realm(battlenet.UNITED_STATES, 'nazjatar')
+        realm = self.connection.get_realm(battlenet.UNITED_STATES, 'Nazjatar')
 
         self.assertIn(realm.population, [Realm.LOW, Realm.MEDIUM, Realm.HIGH])
 
@@ -81,17 +81,16 @@ class RealmTest(unittest.TestCase):
         self._realm_for(battlenet.EUROPE, 'Khaz Modan')
 
     def test_realm_korea(self):
-        self._realm_for(battlenet.KOREA, '가로나')
+        self._realm_for(battlenet.KOREA, 'Aegwynn')
 
     def test_realm_taiwan(self):
-        self._realm_for(battlenet.TAIWAN, '世界之樹')
+        self._realm_for(battlenet.TAIWAN, 'Aeonus')
 
     def test_realm_china(self):
         self._realm_for(battlenet.CHINA, '灰谷')
 
     def test_unicode(self):
-        self._realm_for(battlenet.TAIWAN, '世界之樹')
-        self.assertEqual(realm.name, 'Thermaplugg')
+        self._realm_for(battlenet.CHINA, '灰谷')
 
     def tearDown(self):
         del self.connection
