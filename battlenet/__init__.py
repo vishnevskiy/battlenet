@@ -11,6 +11,7 @@ from .enums import CLASS
 from .enums import QUALITY
 from .enums import RACE_TO_FACTION
 from .enums import EXPANSION
+from .enums import RAIDS
 
 from .exceptions import APIError
 from .exceptions import CharacterNotFound
