@@ -127,7 +127,7 @@ class Connection(object):
 
     def get_character(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
-        realm = quote(realm.lower())
+        realm = quote(realm.lower()).replace("%20", '-')
 
         try:
             data = self.make_request(region, '/character/%s/%s' % (realm, name), {'fields': fields})
@@ -141,7 +141,7 @@ class Connection(object):
 
     def get_guild(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
-        realm = quote(realm.lower())
+        realm = quote(realm.lower()).replace("%20", '-')
 
         try:
             data = self.make_request(region, '/guild/%s/%s' % (realm, name), {'fields': fields})
