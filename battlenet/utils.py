@@ -4,13 +4,16 @@ import urllib
 
 def normalize(name):
     if not isinstance(name, unicode):
-        name = unicode(name)
+        name = name.decode('utf-8')
 
-    return unicodedata.normalize('NFKC', name.replace("'", ''))
+    return unicodedata.normalize('NFKC', name.replace("'", '')).encode('utf-8')
 
 
 def quote(name):
-    return urllib.quote(normalize(name).encode('utf8'))
+    if isinstance(name, unicode):
+        name = normalize(name).encode('utf8')
+
+    return urllib.quote(name)
 
 
 def make_icon_url(region, icon, size='large'):

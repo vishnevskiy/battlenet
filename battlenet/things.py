@@ -409,7 +409,8 @@ class Stats(Thing):
         self.ranged_dps = data['rangedDps']
         self.ranged_hit_rating = data['rangedHitRating']
         self.ranged_speed = data['rangedSpeed']
-        self.resilience = data['resil']
+        self.resilience = data['pvpResilience']
+        self.resilience_rating = data['pvpResilienceRating']
         self.spell_crit = data['spellCrit']
         self.spell_crit_rating = data['spellCritRating']
         self.spell_penetration = data['spellPen']
@@ -515,9 +516,11 @@ class Build(Thing):
         self._character = character
         self._data = data
 
-        self.build = data['build']
-        self.icon = data.get('icon') if self.build.strip('0') else NOICON
-        self.name = data['name'] if self.build.strip('0') else NONE
+        spec = data['spec']
+
+        self.talents = data['talents']
+        self.icon = spec.get('icon', NOICON)
+        self.name = spec.get('name', NONE)
         self.selected = data.get('selected', False)
         self.glyphs = {
             'prime': [],
@@ -525,12 +528,13 @@ class Build(Thing):
             'minor': [],
         }
 
-        if 'glyphs' in data:
-            for type_ in self.glyphs.keys():
-                self.glyphs[type_] = [Glyph(self, glyph) for glyph in data['glyphs'][type_]]
+#        if 'glyphs' in data:
+#            for type_ in self.glyphs.keys():
+#                self.glyphs[type_] = [Glyph(self, glyph) for glyph in data['glyphs'][type_]]
 
-        Tree = collections.namedtuple('Tree', ('points', 'total',))
-        self.trees = [Tree(**tree) for tree in data['trees']]
+#        Tree = collections.namedtuple('Tree', ('points', 'total',))
+#        self.trees = [Tree(**tree) for tree in data['trees']]
+        self.trees = []
 
     def __str__(self):
         return self.name + ' (%d/%d/%d)' % tuple(map(operator.attrgetter('total'), self.trees))

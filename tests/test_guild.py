@@ -37,14 +37,14 @@ class GuildTest(unittest.TestCase):
 
         character = guild.get_leader()
 
-        self.assertEqual(character.name, 'Clí')
+        self.assertEqual(character.name, 'Crabbie')
 
     def test_lazyload_member_character(self):
         guild = Guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence')
 
         character = guild.get_leader()
 
-        self.assertRegexpMatches(character.get_full_class_name(), r'^(Holy|Protection|Retribution) Paladin$')
+        self.assertEqual(character.get_full_class_name(), 'Shadow Priest')
 
     def test_achievements(self):
         guild = Guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence', fields=[Guild.ACHIEVEMENTS])
@@ -54,7 +54,7 @@ class GuildTest(unittest.TestCase):
             self.assertIsInstance(completed_ts, datetime.datetime)
 
     def test_perks(self):
-        guild = Guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence')
+        guild = Guild(battlenet.UNITED_STATES, 'Kiljaeden', 'Éxcellence')
 
         self.assertGreater(len(guild.perks), 1)
 

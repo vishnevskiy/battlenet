@@ -13,7 +13,7 @@ class RealmTest(unittest.TestCase):
         self.connection = battlenet.Connection()
 
     def test_realm_by_name(self):
-        name = "Kil'jaeden"
+        name = "Kiljaeden"
 
         realm = self.connection.get_realm(battlenet.UNITED_STATES, name)
         self.assertEqual(name, realm.name)
@@ -53,7 +53,7 @@ class RealmTest(unittest.TestCase):
     def test_unicode(self):
         realm = self.connection.get_realm(battlenet.EUROPE, 'Термоштепсель')
 
-        self.assertEqual(realm.name, 'Термоштепсель')
+        self.assertEqual(realm.name, 'Thermaplugg')
 
     def tearDown(self):
         del self.connection
