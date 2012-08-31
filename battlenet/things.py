@@ -1,7 +1,7 @@
 import operator
 import collections
 import datetime
-from .enums import RACE, CLASS, QUALITY, RACE_TO_FACTION
+from .enums import RACE, CLASS, QUALITY, RACE_TO_FACTION, RAIDS, EXPANSION
 from .utils import make_icon_url, normalize, make_connection
 
 try:
@@ -9,7 +9,7 @@ try:
 except ImportError:
     import json
 
-__all__ = ['Character', 'Guild', 'Realm']
+__all__ = ['Character', 'Guild', 'Realm', 'Raid']
 
 
 class Thing(object):
@@ -140,7 +140,7 @@ class Character(LazyThing):
         return self.name
 
     def __repr__(self):
-        return '<%s: %s@%s>' % (self.__class__.__name__, self.name, self._data['realm'])
+        return '<%s: %s@%s>' % (self.__class__.__name__, self.name, normalize(self._data['realm']))
 
     def __eq__(self, other):
         if not isinstance(other, Character):
@@ -516,7 +516,7 @@ class Build(Thing):
         self._character = character
         self._data = data
 
-        spec = data['spec']
+        spec = data.get('spec', {})
 
         self.talents = data['talents']
         self.icon = spec.get('icon', NOICON)
@@ -933,3 +933,15 @@ class Race(Thing):
 
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.name)
+
+class Raid(Thing):
+    def __init__(self, id):
+        self.id = id
+
+    def expansion(self):
+        for exp, ids in RAIDS.items():
+            if self.id in ids:
+                for e in EXPANSION.keys():
+                    if EXPANSION[e][0] == exp:
+                        return exp, EXPANSION[e][1]
+        return (None, None)

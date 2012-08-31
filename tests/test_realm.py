@@ -9,6 +9,10 @@ except ImportError:
     import unittest as unittest
     
 class RealmTest(unittest.TestCase):
+    def _realm_for(self, region, name):
+        realm = self.connection.get_realm(region, name)
+        self.assertEqual(realm.name, name)
+
     def setUp(self):
         self.connection = battlenet.Connection()
 
@@ -33,6 +37,26 @@ class RealmTest(unittest.TestCase):
 
         self.assertGreater(len(realms), 0)
 
+    def test_all_realms_europe(self):
+        realms = self.connection.get_all_realms(battlenet.EUROPE)
+
+        self.assertGreater(len(realms), 0)
+
+    def test_all_realms_korea(self):
+        realms = self.connection.get_all_realms(battlenet.KOREA)
+
+        self.assertGreater(len(realms), 0)
+
+    def test_all_realms_taiwan(self):
+        realms = self.connection.get_all_realms(battlenet.TAIWAN)
+
+        self.assertGreater(len(realms), 0)
+
+    def test_all_realms_china(self):
+        realms = self.connection.get_all_realms(battlenet.CHINA)
+
+        self.assertGreater(len(realms), 0)
+
     def test_realms(self):
         names = sorted(['Blackrock', 'Nazjatar'])
 
@@ -41,19 +65,32 @@ class RealmTest(unittest.TestCase):
         self.assertEqual(names, sorted([realm.name for realm in realms]))
 
     def test_realm_type(self):
-        realm = self.connection.get_realm(battlenet.UNITED_STATES, 'nazjatar')
+        realm = self.connection.get_realm(battlenet.UNITED_STATES, 'Nazjatar')
 
         self.assertEqual(realm.type, Realm.PVP)
 
     def test_realm_population(self):
-        realm = self.connection.get_realm(battlenet.UNITED_STATES, 'nazjatar')
+        realm = self.connection.get_realm(battlenet.UNITED_STATES, 'Nazjatar')
 
         self.assertIn(realm.population, [Realm.LOW, Realm.MEDIUM, Realm.HIGH])
 
-    def test_unicode(self):
-        realm = self.connection.get_realm(battlenet.EUROPE, 'Термоштепсель')
+    def test_realm_united_state(self):
+        self._realm_for(battlenet.UNITED_STATES, 'Blackrock')
 
-        self.assertEqual(realm.name, 'Thermaplugg')
+    def test_realm_europe(self):
+        self._realm_for(battlenet.EUROPE, 'Khaz Modan')
+
+    def test_realm_korea(self):
+        self._realm_for(battlenet.KOREA, 'Aegwynn')
+
+    def test_realm_taiwan(self):
+        self._realm_for(battlenet.TAIWAN, 'Aeonus')
+
+    def test_realm_china(self):
+        self._realm_for(battlenet.CHINA, '灰谷')
+
+    def test_unicode(self):
+        self._realm_for(battlenet.CHINA, '灰谷')
 
     def tearDown(self):
         del self.connection
