@@ -11,7 +11,7 @@ def normalize(name):
 
 def quote(name):
     if isinstance(name, unicode):
-        name = normalize(name).encode('utf8')
+        name = normalize(name)
 
     return urllib.quote(name)
 

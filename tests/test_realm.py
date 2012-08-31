@@ -9,12 +9,16 @@ except ImportError:
     import unittest as unittest
     
 class RealmTest(unittest.TestCase):
-    def _realm_for(self, region, name):
-        realm = self.connection.get_realm(region, name)
+    def _realm_for(self, region, name, useLocaleEn=False):
+        if useLocaleEn:
+            realm = self.connection_en.get_realm(region, name)
+        else:
+            realm = self.connection.get_realm(region, name)
         self.assertEqual(realm.name, name)
 
     def setUp(self):
         self.connection = battlenet.Connection()
+        self.connection_en = battlenet.Connection(locale='en')
 
     def test_realm_by_name(self):
         name = "Kiljaeden"
@@ -81,19 +85,29 @@ class RealmTest(unittest.TestCase):
         self._realm_for(battlenet.EUROPE, 'Khaz Modan')
 
     def test_realm_korea(self):
-        self._realm_for(battlenet.KOREA, 'Aegwynn')
+        self._realm_for(battlenet.KOREA, '가로나')
+
+    def test_realm_korea_en(self):
+        self._realm_for(battlenet.KOREA, 'Aegwynn', useLocaleEn=True)
 
     def test_realm_taiwan(self):
-        self._realm_for(battlenet.TAIWAN, 'Aeonus')
+        self._realm_for(battlenet.TAIWAN, '世界之樹')
+
+    def test_realm_taiwan_en(self):
+        self._realm_for(battlenet.TAIWAN, 'Aeonus', useLocaleEn=True)
 
     def test_realm_china(self):
         self._realm_for(battlenet.CHINA, '灰谷')
+
+    def test_realm_china_en(self):
+        self._realm_for(battlenet.CHINA, 'Abbendis', useLocaleEn=True)
 
     def test_unicode(self):
         self._realm_for(battlenet.CHINA, '灰谷')
 
     def tearDown(self):
         del self.connection
+        del self.connection_en
 
 if __name__ == '__main__':
     unittest.main()
