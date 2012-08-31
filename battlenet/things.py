@@ -518,7 +518,7 @@ class Build(Thing):
 
         spec = data.get('spec', {})
 
-        self.talents = data['talents']
+        self.talents = data.get('talents', data.get('build', []))
         self.icon = spec.get('icon', NOICON)
         self.name = spec.get('name', NONE)
         self.selected = data.get('selected', False)
