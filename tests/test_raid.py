@@ -19,6 +19,14 @@ class RaidTest(unittest.TestCase):
     _region = battlenet.EUROPE
     _realm_name = "Lightning's Blade"
 
+    _characters = (
+        (battlenet.UNITED_STATES, 'illidan', 'Zonker'),
+        (battlenet.EUROPE, "Lightning's Blade", 'Sejta'),
+        (battlenet.KOREA, '굴단', '미스호드진'),
+        (battlenet.TAIWAN, '水晶之刺', '憂郁的風'),
+        (battlenet.CHINA, '灰谷', '小蠬蝦'),
+    )
+
     def test_ids(self):
         character = Character(self._region, self._realm_name, self._character_name)
         for raid in character.progression['raids']:
@@ -32,6 +40,12 @@ class RaidTest(unittest.TestCase):
         keys.sort()
         for i in range(len(keys)):
             self.assertEqual(battlenet.EXPANSION[i][0], expansions[i])
+
+    def test_raids_worldwide(self):
+        for region, realm, character_name in self._characters:
+            character = Character(region, realm, character_name)
+            for raid in character.progression['raids']:
+                self.assertIsNotNone(raid)
 
 if __name__ == '__main__':
     unittest.main()
