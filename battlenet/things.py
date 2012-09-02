@@ -511,16 +511,19 @@ class Equipment(Thing):
 
 class Build(Thing):
     def __init__(self, character, data):
-        NONE = 'None'
-        NOICON = 'inv_misc_questionmark' # The infamous macro 'question mark' icon, because Blizzard uses it in this situation.
         self._character = character
         self._data = data
 
         spec = data.get('spec', {})
 
-        self.talents = data.get('talents', data.get('build', []))
-        self.icon = spec.get('icon', NOICON)
-        self.name = spec.get('name', NONE)
+        if 'spec' in data:
+            self.icon = spec.get('icon')
+            self.name = spec.get('name')
+        else:
+            self.icon = 'inv_misc_questionmark'
+            self.name = 'None'
+
+        self.talents = data['talents']
         self.selected = data.get('selected', False)
         self.glyphs = {
             'prime': [],
