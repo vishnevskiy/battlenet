@@ -134,7 +134,7 @@ class CharacterTest(unittest.TestCase):
     def test_achievements(self):
         character = Character(self._region, self._realm_name, self._character_name, fields=[Character.ACHIEVEMENTS])
 
-        self.assertEqual(character.achievements[513], datetime.datetime(2008, 10, 16, 1, 12, 6))
+        self.assertEqual(character.achievements[513], datetime.datetime(2008, 10, 15, 16, 12, 6))
 
     def test_progression(self):
         character = Character(self._region, self._realm_name, self._character_name, fields=[Character.PROGRESSION])

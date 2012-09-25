@@ -17,7 +17,7 @@ except ImportError:
 
 __all__ = ['Connection']
 
-URL_FORMAT = 'https://%(region)s.battle.net/api/%(game)s%(path)s?locale=%(locale)s&%(params)s'
+URL_FORMAT = 'https://%(region)s.battle.net/api/%(game)s%(path)s?%(params)s'
 
 logger = logging.getLogger('battlenet')
 
@@ -30,7 +30,7 @@ class Connection(object):
     defaults = {
         'public_key': None,
         'private_key': None,
-        'locale': ''
+        'locale': 'en_US'
     }
 
     def __init__(self, public_key=None, private_key=None, game='wow', locale=None):
@@ -61,6 +61,7 @@ class Connection(object):
 
     def make_request(self, region, path, params=None, cache=False):
         params = params or {}
+        params['locale'] = self.locale
 
         now = time.gmtime()
         date = '%s, %2d %s %d %2d:%02d:%02d GMT' % (DAYS[now[6]], now[2],
@@ -74,7 +75,6 @@ class Connection(object):
             'region': region,
             'game': self.game,
             'path': path,
-            'locale': self.locale,
             'params': '&'.join('='.join(
                 (k, ','.join(v) if isinstance(v, (set, list)) else v))
                 for k, v in params.items() if v)
