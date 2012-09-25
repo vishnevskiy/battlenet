@@ -7,7 +7,7 @@ import time
 import urlparse
 from .things import Character, Realm, Guild, Reward, Perk, Class, Race
 from .exceptions import APIError, CharacterNotFound, GuildNotFound, RealmNotFound
-from .utils import quote
+from .utils import quote, normalize
 
 try:
     import simplejson as json
@@ -17,7 +17,7 @@ except ImportError:
 
 __all__ = ['Connection']
 
-URL_FORMAT = 'https://%(region)s.battle.net/api/%(game)s%(path)s?%(params)s'
+URL_FORMAT = 'https://%(region)s.battle.net/api/%(game)s%(path)s?locale=%(locale)s&%(params)s'
 
 logger = logging.getLogger('battlenet')
 
@@ -29,13 +29,15 @@ MONTHS = ('', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
 class Connection(object):
     defaults = {
         'public_key': None,
-        'private_key': None
+        'private_key': None,
+        'locale': ''
     }
 
-    def __init__(self, public_key=None, private_key=None, game='wow'):
+    def __init__(self, public_key=None, private_key=None, game='wow', locale=None):
         self.public_key = public_key or Connection.defaults.get('public_key')
         self.private_key = private_key or Connection.defaults.get('private_key')
         self.game = game
+        self.locale = locale or Connection.defaults.get('locale')
 
         self._cache = {}
 
@@ -72,6 +74,7 @@ class Connection(object):
             'region': region,
             'game': self.game,
             'path': path,
+            'locale': self.locale,
             'params': '&'.join('='.join(
                 (k, ','.join(v) if isinstance(v, (set, list)) else v))
                 for k, v in params.items() if v)
@@ -110,7 +113,7 @@ class Connection(object):
 
     def get_character(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
-        realm = quote(realm.lower())
+        realm = quote(realm.lower()).replace("%20", '-')
 
         try:
             data = self.make_request(region, '/character/%s/%s' % (realm, name), {'fields': fields})
@@ -124,7 +127,7 @@ class Connection(object):
 
     def get_guild(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
-        realm = quote(realm.lower())
+        realm = quote(realm.lower()).replace("%20", '-')
 
         try:
             data = self.make_request(region, '/guild/%s/%s' % (realm, name), {'fields': fields})
@@ -154,14 +157,15 @@ class Connection(object):
 
     def get_realm(self, region, name, raw=False):
         data = self.make_request(region, '/realm/status', {'realm': quote(name.lower())})
+        data = [d for d in data['realms'] if normalize(d['name']) == normalize(name)]
 
-        if len(data['realms']) != 1:
+        if len(data) != 1:
             raise RealmNotFound
 
         if raw:
-            return data['realms'][0]
+            return data[0]
 
-        return Realm(self, region, data=data['realms'][0], connection=self)
+        return Realm(self, region, data=data[0], connection=self)
 
     def get_guild_perks(self, region, raw=False):
         data = self.make_request(region, '/data/guild/perks', cache=True)

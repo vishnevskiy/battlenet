@@ -13,6 +13,8 @@ Major features
 * Lazyloading and eagerloading
 
 
+* Support locales (en, fr, de, ...)
+
 Making a connection
 ----------------------
 
@@ -22,7 +24,7 @@ Global connection settings can be setup so that objects can make connections imp
 
     from battlenet import Connection
 
-    Connection.setup(public_key='your public key', private_key='your private key')
+    Connection.setup(public_key='your public key', private_key='your private key', locale='fr')
 
 You can also create connections explicitly.
 
@@ -30,7 +32,7 @@ You can also create connections explicitly.
 
     from battlenet import Connection
 
-    connection = Connection(public_key='your public key', private_key='your private key')
+    connection = Connection(public_key='your public key', private_key='your private key', locale='fr')
 
 Fetching a specific realm
 -------------------------
@@ -60,7 +62,7 @@ Fetching all realms
 
 ::
 
-    for realm in connection.get_all_realms():
+    for realm in connection.get_all_realms(battlenet.UNITED_STATES):
         print realm
 
 Fetching a character
@@ -88,7 +90,7 @@ Fetching a guild
 
 ::
 
-    from battlenet import Character
+    from battlenet import Guild
 
     # If a global connection was setup
     guild = Guild(battlenet.UNITED_STATES, 'Nazjatar', 'Excellence')

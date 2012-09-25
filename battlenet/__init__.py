@@ -4,11 +4,14 @@ from .constants import UNITED_STATES
 from .constants import EUROPE
 from .constants import KOREA
 from .constants import TAIWAN
+from .constants import CHINA
 
 from .enums import RACE
 from .enums import CLASS
 from .enums import QUALITY
 from .enums import RACE_TO_FACTION
+from .enums import EXPANSION
+from .enums import RAIDS
 
 from .exceptions import APIError
 from .exceptions import CharacterNotFound
@@ -37,6 +40,7 @@ from .things import Realm
 from .things import EquippedItem
 from .things import Class
 from .things import Race
+from .things import Raid
 
 from .utils import normalize
 from .utils import quote
