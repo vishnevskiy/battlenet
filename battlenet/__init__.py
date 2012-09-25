@@ -28,7 +28,7 @@ from .things import Glyph
 from .things import Instance
 from .things import Boss
 from .things import Profession
-from .things import Pet
+from .things import HunterPet
 from .things import Guild
 from .things import Emblem
 from .things import Perk

@@ -15,88 +15,25 @@ class DataTest(unittest.TestCase):
         self.connection = battlenet.Connection(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY)
 
     def test_races(self):
-        races = self.connection.get_character_races(
-            battlenet.UNITED_STATES, raw=True)
-
-
-        self.assertEqual(races, [{
-            'mask': 1,
-            'id': 1,
-            'name': 'Human',
-            'side': 'alliance'
-        }, {
-            'mask': 128,
-            'id': 8,
-            'name': 'Troll',
-            'side': 'horde'
-        }, {
-            'mask': 8388608,
-            'id': 24,
-            'name': 'Pandaren',
-            'side': 'neutral'
-        }, {
-            'mask': 1024,
-            'id': 11,
-            'name': 'Draenei',
-            'side': 'alliance'
-        }, {
-            'mask': 2097152,
-            'id': 22,
-            'name': 'Worgen',
-            'side': 'alliance'
-        }, {
-            'mask': 512,
-            'id': 10,
-            'name': 'Blood Elf',
-            'side': 'horde'
-        }, {
-            'mask': 8,
-            'id': 4,
-             'name': 'Night Elf',
-            'side': 'alliance'
-        }, {
-            'mask': 4,
-            'id': 3,
-            'name': 'Dwarf',
-            'side': 'alliance'
-        }, {
-            'mask': 16777216,
-            'id': 25,
-            'name': 'Pandaren',
-            'side': 'alliance'
-        }, {
-            'mask': 33554432,
-            'id': 26,
-            'name': 'Pandaren',
-            'side': 'horde'
-        }, {
-           'mask': 32,
-           'id': 6,
-           'name': 'Tauren',
-           'side': 'horde'
-        }, {
-           'mask': 16,
-           'id': 5,
-           'name': 'Undead',
-            'side': 'horde'
-        }, {
-            'mask': 2,
-            'id': 2,
-            'name': 'Orc',
-            'side': 'horde'
-        }, {
-            'mask': 64,
-            'id': 7,
-            'name': 'Gnome',
-            'side': 'alliance'
-        }, {
-            'mask': 256,
-            'id': 9,
-            'name': 'Goblin',
-            'side': 'horde'
-        }])
-
         races = self.connection.get_character_races(battlenet.UNITED_STATES)
+
+        self.assertEqual({
+            1: u'Human',
+            2: u'Orc',
+            3: u'Dwarf',
+            4: u'Night Elf',
+            5: u'Undead',
+            6: u'Tauren',
+            7: u'Gnome',
+            8: u'Troll',
+            9: u'Goblin',
+            10: u'Blood Elf',
+            11: u'Draenei',
+            22: u'Worgen',
+            24: u'Pandaren',
+            25: u'Pandaren',
+            26: u'Pandaren',
+        }, dict([(race.id, race.name) for race in races]))
 
         for race in races:
             self.assertIn(race.side, ['alliance', 'horde', 'neutral'])

@@ -92,11 +92,11 @@ class CharacterTest(unittest.TestCase):
 
         self.assertEqual(character.name, 'ßæn')
 
-    def test_pet_class(self):
-        character = Character(battlenet.UNITED_STATES, 'Kiljaeden', 'Tandisse', fields=[Character.PETS])
+    def test_hunter_pet_class(self):
+        character = Character(battlenet.UNITED_STATES, 'Kiljaeden', 'Tandisse', fields=[Character.HUNTER_PETS])
 
-        self.assertTrue(hasattr(character, 'pets'))
-        self.assertIn('Rudebull', [pet.name for pet in character.pets])
+        self.assertTrue(hasattr(character, 'hunter_pets'))
+        self.assertIn('Rudebull', [pet.name for pet in character.hunter_pets])
 
     def test_achievements(self):
         character = Character(battlenet.UNITED_STATES, 'Nazjatar', 'Stanislav', fields=[Character.ACHIEVEMENTS])

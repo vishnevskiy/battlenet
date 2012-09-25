@@ -34,7 +34,8 @@ class Thing(object):
 
 class LazyThing(Thing):
     def __init__(self, data, fields=None):
-        Thing.__init__(self, data)
+        super(LazyThing, self).__init__(data)
+
         self._fields = set(fields or [])
 
     def _refresh_if_not_present(self, field):
@@ -118,18 +119,18 @@ class Character(LazyThing):
     MOUNTS = 'mounts'
     GUILD = 'guild'
     QUESTS = 'quests'
-    PETS = 'pets'
+    HUNTER_PETS = 'hunterPets'
     PROGRESSION = 'progression'
     ACHIEVEMENTS = 'achievements'
     ALL_FIELDS = [STATS, TALENTS, ITEMS, REPUTATIONS, TITLES, PROFESSIONS,
-                  APPEARANCE, COMPANIONS, MOUNTS, GUILD, QUESTS, PETS,
+                  APPEARANCE, COMPANIONS, MOUNTS, GUILD, QUESTS, HUNTER_PETS,
                   PROGRESSION, ACHIEVEMENTS]
 
     def __init__(self, region, realm=None, name=None, data=None, fields=None, connection=None):
+        super(Character, self).__init__(data, fields)
+
         self.region = region
         self.connection = connection or make_connection()
-
-        self._fields = set(fields or [])
 
         if realm and name and not data:
             data = self.connection.get_character(region, realm, name, raw=True, fields=self._fields)
@@ -170,8 +171,8 @@ class Character(LazyThing):
         else:
             self.last_modified = None
 
-        if 'pets' in data:
-            self.pets = [Pet(pet) for pet in self._data['pets']]
+        if 'hunterPets' in data:
+            self.hunter_pets = [HunterPet(hunter_pet) for hunter_pet in self._data['hunterPets']]
 
     @property
     def realm(self):
@@ -329,9 +330,9 @@ class Character(LazyThing):
 
 class Title(Thing):
     def __init__(self, character, data):
-        self._character = character
-        self._data = data
+        super(Title, self).__init__(data)
 
+        self._character = character
         self.id = data['id']
         self.format = data['name']
         self.selected = data.get('selected', False)
@@ -345,7 +346,7 @@ class Title(Thing):
 
 class Reputation(Thing):
     def __init__(self, data):
-        self._data = data
+        super(Reputation, self).__init__(data)
 
         self.id = data['id']
         self.name = data['name']
@@ -366,8 +367,9 @@ class Reputation(Thing):
 
 class Stats(Thing):
     def __init__(self, character, data):
+        super(Stats, self).__init__(data)
+
         self._character = character
-        self._data = data
 
         self.agility = data['agi']
         self.armor = data['armor']
@@ -461,7 +463,7 @@ class Stats(Thing):
 
 class Appearance(Thing):
     def __init__(self, data):
-        self._data = data
+        super(Appearance, self).__init__(data)
 
         self.face = data['faceVariation']
         self.feature = data['featureVariation']
@@ -474,8 +476,9 @@ class Appearance(Thing):
 
 class Equipment(Thing):
     def __init__(self, character, data):
+        super(Equipment, self).__init__(data)
+
         self._character = character
-        self._data = data
 
         self.average_item_level = data['averageItemLevel']
         self.average_item_level_equipped = data['averageItemLevelEquipped']
@@ -511,13 +514,13 @@ class Equipment(Thing):
 
 class Build(Thing):
     def __init__(self, character, data):
+        super(Build, self).__init__(data)
+
         NONE = 'None'
         NOICON = 'inv_misc_questionmark' # The infamous macro 'question mark' icon, because Blizzard uses it in this situation.
+
         self._character = character
-        self._data = data
-
         spec = data['spec']
-
         self.talents = data['talents']
         self.icon = spec.get('icon', NOICON)
         self.name = spec.get('name', NONE)
@@ -527,13 +530,6 @@ class Build(Thing):
             'major': [],
             'minor': [],
         }
-
-#        if 'glyphs' in data:
-#            for type_ in self.glyphs.keys():
-#                self.glyphs[type_] = [Glyph(self, glyph) for glyph in data['glyphs'][type_]]
-
-#        Tree = collections.namedtuple('Tree', ('points', 'total',))
-#        self.trees = [Tree(**tree) for tree in data['trees']]
         self.trees = []
 
     def __str__(self):
@@ -548,8 +544,9 @@ class Build(Thing):
 
 class Glyph(Thing):
     def __init__(self, character, data):
+        super(Glyph, self).__init__(data)
+
         self._character = character
-        self._data = data
 
         self.name = data['name']
         self.glyph = data['glyph']
@@ -568,8 +565,9 @@ class Glyph(Thing):
 
 class Instance(Thing):
     def __init__(self, character, data, type_):
+        super(Instance, self).__init__(data)
+
         self._character = character
-        self._data = data
         self._type = type_
 
         self.name = data['name']
@@ -596,8 +594,9 @@ class Instance(Thing):
 
 class Boss(Thing):
     def __init__(self, instance, data):
+        super(Boss, self).__init__(data)
+
         self._instance = instance
-        self._data = data
 
         self.id = data['id']
         self.name = data['name']
@@ -613,8 +612,9 @@ class Boss(Thing):
 
 class Profession(Thing):
     def __init__(self, character, data):
+        super(Profession, self).__init__(data)
+
         self._character = character
-        self._data = data
 
         self.id = data['id']
         self.name = data['name']
@@ -630,9 +630,9 @@ class Profession(Thing):
         return '<%s: %s>' % (self.__class__.__name__, self.name)
 
 
-class Pet(Thing):
+class HunterPet(Thing):
     def __init__(self, data):
-        self._data = data
+        super(HunterPet, self).__init__(data)
 
         self.name = data['name']
         self.creature = data['creature']
@@ -651,10 +651,10 @@ class Guild(LazyThing):
     ALL_FIELDS = [ACHIEVEMENTS, MEMBERS]
 
     def __init__(self, region, realm=None, name=None, data=None, fields=None, connection=None):
+        super(Guild, self).__init__(data, fields)
+
         self.region = region
         self.connection = connection or make_connection()
-
-        self._fields = set(fields or [])
 
         if realm and name:
             data = self.connection.get_guild(region, realm, name, raw=True, fields=self._fields)
@@ -675,7 +675,7 @@ class Guild(LazyThing):
         return '<%s: %s@%s>' % (self.__class__.__name__, self.name, self._data['realm'])
 
     def _populate_data(self, data):
-        if hasattr(self, '_data'):
+        if self._data is not None:
             data['realm'] = self._data['realm']  # Copy over realm since API does not provide it!
 
         self._data = data
@@ -762,7 +762,7 @@ class Guild(LazyThing):
 
 class Emblem(Thing):
     def __init__(self, data):
-        self._data = data
+        super(Emblem, self).__init__(data)
 
         self.border = data['border']
         self.border_color = data['borderColor']
@@ -773,8 +773,9 @@ class Emblem(Thing):
 
 class Perk(Thing):
     def __init__(self, region, data):
+        super(Perk, self).__init__(data)
+
         self._region = region
-        self._data = data
 
         self.id = data['spell']['id']
         self.name = data['spell']['name']
@@ -804,7 +805,7 @@ class Perk(Thing):
 
 class Reward(Thing):
     def __init__(self, region, data):
-        self._data = data
+        super(Reward, self).__init__(data)
 
         self.min_guild_level = data['minGuildLevel']
         self.min_guild_reputation = data['minGuildRepLevel']
@@ -833,6 +834,8 @@ class Realm(Thing):
     LOW = 'low'
 
     def __init__(self, region, name=None, data=None, connection=None):
+        super(Realm, self).__init__(data)
+
         self.region = region
         self.connection = connection or make_connection()
 
@@ -872,8 +875,9 @@ class Realm(Thing):
 
 class EquippedItem(Thing):
     def __init__(self, region, data):
+        super(EquippedItem, self).__init__(data)
+
         self._region = region
-        self._data = data
 
         self.id = data['id']
         self.name = data['name']
@@ -906,7 +910,7 @@ class EquippedItem(Thing):
 
 class Class(Thing):
     def __init__(self, data):
-        self._data = data
+        super(Class, self).__init__(data)
 
         self.id = data['id']
         self.mask = data['mask']
@@ -921,7 +925,7 @@ class Class(Thing):
 
 class Race(Thing):
     def __init__(self, data):
-        self._data = data
+        super(Race, self).__init__(data)
 
         self.id = data['id']
         self.mask = data['mask']

@@ -12,7 +12,6 @@ Major features
 
 * Lazyloading and eagerloading
 
-* Eventlet support
 
 Making a connection
 ----------------------
