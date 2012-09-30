@@ -11,6 +11,9 @@ RACE = {
     10: 'Blood Elf',
     11: 'Draenei',
     22: 'Worgen',
+    24: 'Pandaren',
+    25: 'Pandaren',
+    26: 'Pandaren',
 }
 
 CLASS = {
@@ -47,6 +50,9 @@ RACE_TO_FACTION = {
     10: 'Horde',
     11: 'Alliance',
     22: 'Alliance',
+    24: '?',
+    25: 'Alliance',
+    26: 'Horde',
 }
 
 EXPANSION = {
