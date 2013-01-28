@@ -604,8 +604,8 @@ class Boss(Thing):
 
         self.id = data['id']
         self.name = data['name']
-        self.normal = data['normalKills']
-        self.heroic = data['heroicKills']
+        self.normal = data.get('normalKills', 0)
+        self.heroic = data.get('heroicKills', 0)
 
     def __str__(self):
         return self.name
@@ -920,7 +920,7 @@ class Class(Thing):
         self.mask = data['mask']
         self.name = data['name']
         self.power_type = data['powerType']
-        
+
     def __str__(self):
         return self.name
 
