@@ -5,3 +5,5 @@
 # vi backups
 *~
 .*.swp
+build
+*.egg
