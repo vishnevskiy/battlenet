@@ -5,6 +5,7 @@ import hmac
 import hashlib
 import time
 import urlparse
+import re
 from .things import Character, Realm, Guild, Reward, Perk, Class, Race
 from .exceptions import APIError, CharacterNotFound, GuildNotFound, RealmNotFound
 from .utils import quote, normalize
@@ -111,9 +112,13 @@ class Connection(object):
 
         return data
 
+    def clean_realm(self, realm):
+        realm = re.sub('[()]', '', realm)
+        return quote(realm.lower()).replace("%20", '-')
+
     def get_character(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
-        realm = quote(realm.lower()).replace("%20", '-')
+        realm = self.clean_realm(realm)
 
         try:
             data = self.make_request(region, '/character/%s/%s' % (realm, name), {'fields': fields})
@@ -127,7 +132,7 @@ class Connection(object):
 
     def get_guild(self, region, realm, name, fields=None, raw=False):
         name = quote(name.lower())
-        realm = quote(realm.lower()).replace("%20", '-')
+        realm = self.clean_realm(realm)
 
         try:
             data = self.make_request(region, '/guild/%s/%s' % (realm, name), {'fields': fields})
