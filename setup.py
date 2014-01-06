@@ -5,7 +5,7 @@ DESCRIPTION = "Python Library for Blizzard's Community Platform API"
 with open('README.rst') as f:
     LONG_DESCRIPTION = f.read()
 
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
