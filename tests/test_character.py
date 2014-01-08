@@ -42,7 +42,7 @@ class CharacterTest(unittest.TestCase):
     _pet_name = 'DEVAJR'
 
     _characters = (
-        (battlenet.UNITED_STATES, 'illidan', 'Zonker'),
+        (battlenet.UNITED_STATES, "Khaz'goroth", 'Azramon'),
         (battlenet.EUROPE, "Lightning's Blade", 'Sejta'),
         (battlenet.KOREA, '굴단', '미스호드진'),
         (battlenet.TAIWAN, '水晶之刺', '憂郁的風'),

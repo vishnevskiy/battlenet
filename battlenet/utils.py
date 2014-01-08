@@ -6,6 +6,7 @@ def normalize(name):
     if not isinstance(name, unicode):
         name = name.decode('utf-8')
 
+    name = name.replace("'", '')
     return ''.join(c for c in unicodedata.normalize('NFD', name)
            if unicodedata.category(c) != 'Mn').encode('utf-8')
 
