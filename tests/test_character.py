@@ -18,17 +18,17 @@ battlenet.Connection.setup(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY)
 
 class CharacterTest(unittest.TestCase):
 
-    _character_name = 'Sejta'
+    _character_name = 'Därtvader'
     _region = battlenet.EUROPE
-    _realm_name = "Lightning's Blade"
-    _guild_name = 'DREAM Paragon'
+    _realm_name = "Ragnaros"
+    _guild_name = 'Dark Omen'
     _faction = Character.HORDE
     _race = Character.TAUREN
-    _class = Character.DRUID
-    _level = 85
+    _class = Character.WARRIOR
+    _level = 90
     _gender = Character.MALE
-    _profession_1 = Character.LEATHERWORKING
-    _profession_2 = Character.JEWELCRATING
+    _profession_1 = Character.JEWELCRATING
+    _profession_2 = Character.MINING
     _professions_secondary = (Character.ARCHAEOLOGY, Character.COOKING, Character.FIRST_AID, Character.FISHING)
     _appearance_face = 1
     _appearance_feature = 6
@@ -43,7 +43,7 @@ class CharacterTest(unittest.TestCase):
 
     _characters = (
         (battlenet.UNITED_STATES, "Khaz'goroth", 'Azramon'),
-        (battlenet.EUROPE, "Lightning's Blade", 'Sejta'),
+        (battlenet.EUROPE, "Ragnaros", 'Därtvader'),
         (battlenet.KOREA, '굴단', '미스호드진'),
         (battlenet.TAIWAN, '水晶之刺', '憂郁的風'),
         (battlenet.CHINA, '灰谷', '小蠬蝦'),

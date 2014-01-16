@@ -1,5 +1,6 @@
 import logging
 import urllib2
+import urllib
 import base64
 import hmac
 import hashlib
@@ -85,7 +86,6 @@ class Connection(object):
             return self._cache[url]
 
         uri = urlparse.urlparse(url)
-
         if self.public_key:
             signature = self.sign_request('GET', date, uri.path, self.private_key)
             headers['Authorization'] = 'BNET %s:%s' % (self.public_key, signature)
