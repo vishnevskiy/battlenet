@@ -161,7 +161,7 @@ class Character(LazyThing):
         self.thumbnail = data['thumbnail']
         self.gender = data['gender']
         self.achievement_points = data['achievementPoints']
-        self.faction = RACE_TO_FACTION[self.race]
+        self.faction = RACE_TO_FACTION.get(self.race, 'unknown')
 
         if Character.GUILD in self._fields and Character.GUILD not in self._data:
             self._data[Character.GUILD] = None
@@ -739,6 +739,10 @@ class Guild(LazyThing):
 
             for member in self._data[Guild.MEMBERS]:
                 character = Character(self.region, data=member['character'], connection=self.connection)
+
+                if not character.name:
+                    continue
+
                 character._guild = self
 
                 self._members.append({
