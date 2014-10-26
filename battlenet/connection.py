@@ -211,6 +211,11 @@ class Connection(object):
 
         return [Race(race) for race in races]
 
-    def get_item(self, region, item_id, raw=False):
-        data = self.make_request(region, '/item/%d' % item_id)
+    def get_item(self, region, item_id, raw=False, context=None):
+        url = '/item/%d' % item_id
+        if context:
+            url = '%s/%s' % (url, context)
+        data = self.make_request(region, url)
+        if 'name' not in data:
+            return self.get_item(region, item_id, raw=raw, context=data['availableContexts'][0])
         return data
