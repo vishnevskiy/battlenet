@@ -685,7 +685,6 @@ class Guild(LazyThing):
         self._data = data
 
         self.name = normalize(data['name'])
-        self.level = data['level']
         self.emblem = Emblem(data['emblem']) if 'emblem' in data else None
         self.achievement_points = data['achievementPoints']
         self.faction = ({
