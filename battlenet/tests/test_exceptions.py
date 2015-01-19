@@ -1,31 +1,46 @@
 import os
+import urllib2
+import pytest
+from mock import patch, MagicMock, call
+import time
+
 import battlenet
+from battlenet.tests.fixtures import *
 
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest as unittest
-
-PUBLIC_KEY = os.environ.get('BNET_PUBLIC_KEY')
-PRIVATE_KEY = os.environ.get('BNET_PRIVATE_KEY')
-
-class ExceptionTest(unittest.TestCase):
-    def setUp(self):
-        self.connection = battlenet.Connection(public_key=PUBLIC_KEY, private_key=PRIVATE_KEY)
+class Test_Exceptions:
 
     def test_character_not_found(self):
-        self.assertRaises(battlenet.CharacterNotFound,
-            lambda: self.connection.get_character(battlenet.UNITED_STATES, 'Fake Realm', 'Fake Character'))
+        f = connection_throwing_urlerror(urllib2.URLError("foo"),
+                                         battlenet.CharacterNotFound,
+                                         'get_character',
+                                         (battlenet.UNITED_STATES, 'Fake Realm', 'Fake Character'))
+        conn, tval_s, mock_urlopen, mock_req, mock_request, res, raised = f
+        assert raised.typename == 'CharacterNotFound'
+        assert mock_urlopen.mock_calls == [call(mock_req)]
+        assert mock_req.mock_calls == []
+        url = 'https://us.battle.net/api/wow/character/fake-realm/fake%20character?locale=en_US'
+        assert mock_request.mock_calls == [call(url, None, {'Date': 'Mon, 19 Jan 2015 14:02:40 GMT'})]
 
     def test_guild_not_found(self):
-        self.assertRaises(battlenet.GuildNotFound,
-            lambda: self.connection.get_guild(battlenet.UNITED_STATES, 'Fake Realm', 'Fake Guild'))
+        f = connection_throwing_urlerror(urllib2.URLError("foo"),
+                                         battlenet.GuildNotFound,
+                                         'get_guild',
+                                         (battlenet.UNITED_STATES, 'Fake Realm', 'Fake Guild'))
+        conn, tval_s, mock_urlopen, mock_req, mock_request, res, raised = f
+        assert raised.typename == 'GuildNotFound'
+        assert mock_urlopen.mock_calls == [call(mock_req)]
+        assert mock_req.mock_calls == []
+        url = 'https://us.battle.net/api/wow/guild/fake-realm/fake%20guild?locale=en_US'
+        assert mock_request.mock_calls == [call(url, None, {'Date': 'Mon, 19 Jan 2015 14:02:40 GMT'})]
 
     def test_realm_not_found(self):
-        self.assertRaises(battlenet.RealmNotFound, lambda: self.connection.get_realm(battlenet.EUROPE, 'Fake Realm'))
-
-    def tearDown(self):
-        del self.connection
-
-if __name__ == '__main__':
-    unittest.main()
+        f = connection_throwing_urlerror(urllib2.URLError("foo"),
+                                         battlenet.RealmNotFound,
+                                         'get_realm',
+                                         (battlenet.UNITED_STATES, 'Fake Realm'))
+        conn, tval_s, mock_urlopen, mock_req, mock_request, res, raised = f
+        assert raised.typename == 'RealmNotFound'
+        assert mock_urlopen.mock_calls == [call(mock_req)]
+        assert mock_req.mock_calls == []
+        url = 'https://us.battle.net/api/wow/realm/status?locale=en_US&realm=fake%20realm'
+        assert mock_request.mock_calls == [call(url, None, {'Date': 'Mon, 19 Jan 2015 14:02:40 GMT'})]
