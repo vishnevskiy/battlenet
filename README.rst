@@ -193,6 +193,8 @@ Testing is done via `pytest <http://pytest.org/latest/>`_, driven by `tox <http:
 
 * If you want to pass additional arguments to pytest, add them to the tox command line after "--". i.e., for verbose pytext output on py27 tests: ``tox -e py27 -- -v``
 
+* All tests that actually hit the BattleNet API should be decorated with the ``@pytest.mark.integration`` decorator. This allows us to run these iff the unit tests passed.
+
 Release Checklist
 -----------------
 

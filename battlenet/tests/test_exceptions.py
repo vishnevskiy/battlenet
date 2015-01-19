@@ -44,3 +44,27 @@ class Test_Exceptions:
         assert mock_req.mock_calls == []
         url = 'https://us.battle.net/api/wow/realm/status?locale=en_US&realm=fake%20realm'
         assert mock_request.mock_calls == [call(url, None, {'Date': 'Mon, 19 Jan 2015 14:02:40 GMT'})]
+
+    @pytest.mark.integration
+    def test_integration_character_not_found(self):
+        conn = battlenet.connection.Connection()
+        res = None
+        with pytest.raises(battlenet.CharacterNotFound):
+            res = conn.get_character(battlenet.UNITED_STATES, 'Arthas', 'a')
+        assert res is None
+
+    @pytest.mark.integration
+    def test_integration_guild_not_found(self):
+        conn = battlenet.connection.Connection()
+        res = None
+        with pytest.raises(battlenet.GuildNotFound):
+            res = conn.get_guild(battlenet.UNITED_STATES, 'Arthas', 'a')
+        assert res is None
+
+    @pytest.mark.integration
+    def test_integration_realm_not_found(self):
+        conn = battlenet.connection.Connection()
+        res = None
+        with pytest.raises(battlenet.RealmNotFound):
+            res = conn.get_realm(battlenet.UNITED_STATES, 'a')
+        assert res is None
