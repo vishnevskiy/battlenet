@@ -8,3 +8,5 @@
 build
 *.egg
 *.egg-info
+
+.cache
